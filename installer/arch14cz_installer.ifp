@@ -1,0 +1,379 @@
+﻿[Header]
+ProjectFileVersion = 1.1
+[General]
+Program name = Arch14CZ
+Program version = 0.1.0
+Windows 2000 = 0
+Windows XP = 0
+Windows Server 2003 = 0
+Windows Vista = 0
+Windows Server 2008 = 0
+Windows 7 = 1
+Windows 8 = 1
+Windows 10 = 1
+Windows Server 2016 = 0
+DoNotCheckOS = 1
+Company name = Peter Demján
+Website = https://github.com/demjanp/arch14cz_backend
+SFA = 0
+DFA = 0
+Comp = 1
+[Graphics]
+Wizard image = c:\documents_synced\Arch14CZ\arch14cz_backend\installer\arch14cz_installer.jpg
+Header image = c:\documents_synced\Arch14CZ\arch14cz_backend\installer\arch14cz_icon.png
+Show Label = 1
+VisualStylesEnabled = 1
+[Files]
+Installation path = <ProgramFiles>\Arch14CZ\
+Autcip = 1
+[Uninstall]
+Vwau = 0
+Website = https://
+Include uninstaller = 1
+Uninstaller filename = Uninstall
+UseCustomDisplayIcon = 1
+CustomDisplayIcon = <InstallPath>\arch14cz_icon.ico
+[Licence]
+Licence dialog = 0
+[Finish]
+Sart program = 0
+Reboot computer = 0
+Program = <InstallPath>\
+ProgramArguments = 
+[Shortcuts]
+Allowtc = 0
+Shortcut path = Arch14CZ\
+[Serialoptions]
+Allows = 0
+Number = 1000
+Mask = #####-#####-#####-#####
+[SplashScreen]
+Image = 
+Sound = 
+Time = 2
+PlaySound = 0
+Allow = 0
+[Build]
+File = C:\data_processed\arch14cz_0_1_0_setup.exe
+SetupIconPath = c:\documents_synced\Arch14CZ\arch14cz_backend\installer\arch14cz_icon.ico
+UninstallIconPath = c:\documents_synced\Arch14CZ\arch14cz_backend\installer\arch14cz_icon.ico
+CompressionMethod = 0
+CompressionLevel = 2
+[Updater]
+Allow = 0
+1 = <AppName>
+2 = <AppVersion>
+3 = http://
+4 = http://
+5 = http://
+6 = Update
+Language = 0
+RunProg = 
+RunProgs = 0
+Execdlls = 0
+[Languages]
+[Files/Dirs]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\PIL
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\PySide2
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\Shapely.libs
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\arch14cz_backend
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\cryptography
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\cryptography-38.0.4.dist-info
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\deposit_gui
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\docutils
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\networkit
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\numpy
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\psycopg2
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\scipy
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\scipy.libs
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\setuptools-63.2.0.dist-info
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\shapely
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\shiboken2
+N/A
+[Folder]
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\THIRDPARTY.TXT
+133.3 KB
+TXT
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\VCRUNTIME140.dll
+96.4 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\VCRUNTIME140_1.dll
+37.4 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\_asyncio.pyd
+62.9 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\_bz2.pyd
+81.4 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\_cffi_backend.cp310-win_amd64.pyd
+177 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\_ctypes.pyd
+119.9 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\_decimal.pyd
+244.4 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\_elementtree.pyd
+124.9 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\_hashlib.pyd
+60.4 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\_lzma.pyd
+154.4 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\_msi.pyd
+42.4 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\_multiprocessing.pyd
+32.4 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\_overlapped.pyd
+47.4 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\_queue.pyd
+29.9 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\_socket.pyd
+75.9 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\_ssl.pyd
+155.4 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\_uuid.pyd
+23.4 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-console-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-datetime-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-debug-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-errorhandling-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-fibers-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-file-l1-1-0.dll
+24.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-file-l1-2-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-file-l2-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-handle-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-heap-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-interlocked-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-libraryloader-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-localization-l1-2-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-memory-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-namedpipe-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-processenvironment-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-processthreads-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-processthreads-l1-1-1.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-profile-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-rtlsupport-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-string-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-synch-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-synch-l1-2-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-sysinfo-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-timezone-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-core-util-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-crt-conio-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-crt-convert-l1-1-0.dll
+24.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-crt-environment-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-crt-filesystem-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-crt-heap-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-crt-locale-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-crt-math-l1-1-0.dll
+28.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-crt-private-l1-1-0.dll
+72.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-crt-process-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-crt-runtime-l1-1-0.dll
+24.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-crt-stdio-l1-1-0.dll
+24.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-crt-string-l1-1-0.dll
+24.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-crt-time-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\api-ms-win-crt-utility-l1-1-0.dll
+20.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\arch14cz.exe
+11 MB
+exe
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\arch14cz_icon.ico
+191.4 KB
+ico
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\base_library.zip
+1 MB
+zip
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\cdt.dll
+24 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\cgraph.dll
+73.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\expat.dll
+180.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\gvc.dll
+538.5 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\libcrypto-1_1.dll
+3.3 MB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\libffi-7.dll
+32 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\libopenblas64__v0.3.21-gcc_10_3_0.dll
+34.2 MB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\libssl-1_1.dll
+682.4 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\pathplan.dll
+39 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\pyexpat.pyd
+193.9 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\python3.dll
+63.4 KB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\python310.dll
+4.3 MB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\select.pyd
+28.4 KB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\ucrtbase.dll
+1.1 MB
+dll
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\unicodedata.pyd
+1.1 MB
+pyd
+C:\documents_synced\Arch14CZ\arch14cz_backend\dist\arch14cz\xdot.dll
+25 KB
+dll
+[Licence_Begin]
+114
+{\rtf1\ansi\ansicpg1252\deff0\deflang2057{\fonttbl{\f0\fnil\fcharset0 Arial;}}
+\viewkind4\uc1\pard\fs20\par
+}
+ [Licence_End]
+[Registry]
+[Variables]
+[SCs]
+Desktop
+Arch14CZ
+<InstallPath>\arch14cz.exe
+
+<InstallPath>\arch14cz_icon.ico
+0
+Startmenu
+Arch14CZ
+<InstallPath>\arch14cz.exe
+
+<InstallPath>\arch14cz_icon.ico
+0
+[IFP_End]
+[Serials]
+[Serials_End]
+[Commands]
