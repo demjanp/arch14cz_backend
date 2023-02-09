@@ -6,7 +6,7 @@ block_cipher = None
 
 a = Analysis(
     ['..\\bin\\start_arch14cz.py'],
-    pathex=['..\\venv\\Lib\\site-packages'],
+    pathex=['d:\\data_processed\\Arch14CZ\\venv\\Lib\\site-packages\\'],
     binaries=[],
     datas=[],
     hiddenimports=[
@@ -16,6 +16,7 @@ a = Analysis(
 		'networkit.helpers',
 		'networkit.traversal',
 		'scipy.io',
+		'xml.dom',
 	],
     hookspath=[],
     hooksconfig={},
