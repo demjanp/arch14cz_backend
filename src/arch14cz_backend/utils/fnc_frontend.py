@@ -7,6 +7,7 @@ from arch14cz_backend.utils.fnc_phasing import (get_phasing)
 from collections import defaultdict
 from datetime import datetime
 import psycopg2
+import time
 import sys
 import os
 
@@ -76,18 +77,6 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			return ""
 		return str(value)
 	
-	def format_pg(value):
-		
-		if isinstance(value, str):
-			return "'%s'" % (value.replace("'", "’"))
-		elif isinstance(value, list):
-			return "ARRAY [%s]::integer[]" % (", ".join(
-				[str(val).replace("'", "’") for val in value]
-			))
-		elif value is None:
-			return "''"
-		return str(value)
-	
 	errors = []
 	n_published = 0
 	n_rows = 0
@@ -149,7 +138,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	progress.update_state(text = "Calibrating C-14 dates")
 	curve = load_calibration_curve(path_curve, interpolate = False)
 	cnt = 1
-	cmax = 2*n_rows + 30
+	cmax = 3*n_rows + 30
 	for obj in cls_c14.get_members(direct_only = True):
 		progress.update_state(value = cnt, maximum = cmax)
 		if progress.cancel_pressed():
@@ -201,7 +190,8 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		if progress.cancel_pressed():
 			return n_published, n_rows, ["Cancelled by user"]
 		if name in tables:
-			cursor.execute("DELETE FROM \"%s\";" % (name))	
+			cursor.execute("DROP TABLE IF EXISTS \"%s\";" % (name))
+	
 	if table_main not in tables:
 		cursor.execute('''CREATE TABLE %s (
 			"Arch14CZ_ID" TEXT,
@@ -264,6 +254,19 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	
 	conn.commit()
 	
+	# wait until tables are created on server
+	cursor = conn.cursor()
+	tables = []
+	while not tables:
+		cursor = conn.cursor()
+		cursor.execute(
+			"SELECT table_name FROM information_schema.tables WHERE table_schema = '%s';" % (schema)
+		)
+		tables = [row[0] for row in cursor.fetchall()]
+		if progress.cancel_pressed():
+			return n_published, n_rows, ["Cancelled by user"]
+		time.sleep(0.5)
+	
 	progress.update_state(text = "Collecting data", value = cnt, maximum = cmax)
 	
 	dict_country = set([])
@@ -286,6 +289,11 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		silent = True
 	)
 	for row in range(len(query)):
+		progress.update_state(value = cnt, maximum = cmax)
+		if progress.cancel_pressed():
+			return n_published, n_rows, ["Cancelled by user"]
+		cnt += 1
+		
 		obj_id = query[row, "C_14_Analysis", "Arch14CZ_ID"][0]
 		lookup_Sample[obj_id] = str_or_empty(query[row, "Sample", "Number"][1])
 		lookup_Context[obj_id] = {
@@ -313,10 +321,6 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			lookup_CountryDistrictCadastre[obj_id]["District"], 
 			lookup_CountryDistrictCadastre[obj_id]["Country_Code"]
 		))
-	cnt += 1
-	progress.update_state(value = cnt, maximum = cmax)
-	if progress.cancel_pressed():
-		return n_published, n_rows, ["Cancelled by user"]
 	
 	lookup_Reliability = {}   # {obj_id: Name, ...}
 	query = cmodel.get_query(
@@ -443,9 +447,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			return n_published, n_rows, ["Cancelled by user"]
 		for value in data:
 			if value:
-				cursor.execute("INSERT INTO %s VALUES (%s);" % (
-					name, format_pg(value)
-				))
+				cursor.execute("INSERT INTO %s VALUES (%%s);" % (name), (value,))
 	
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
@@ -455,9 +457,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		if district:
 			code = "%s#%s" % (district, country_code)
 			label = "%s (%s)" % (district, country_code)
-			cursor.execute("INSERT INTO %s VALUES (%s, %s);" % (
-				table_district, format_pg(code), format_pg(label)
-			))
+			cursor.execute("INSERT INTO %s VALUES (%%s, %%s);" % (table_district), (code, label))
 	
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
@@ -467,9 +467,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		if cadastre:
 			code = "%s#%s#%s" % (cadastre, district, country_code)
 			label = "%s (%s, %s)" % (cadastre, district, country_code)
-			cursor.execute("INSERT INTO %s VALUES (%s, %s);" % (
-				table_cadastre, format_pg(code), format_pg(label)
-			))
+			cursor.execute("INSERT INTO %s VALUES (%%s, %%s);" % (table_cadastre), (code, label))
 	
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
@@ -477,9 +475,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		return n_published, n_rows, ["Cancelled by user"]
 	for name, order_min, order_max in dict_relative_dating:
 		code = "%d#%d" % (order_min, order_max)
-		cursor.execute("INSERT INTO %s VALUES (%s, %s);" % (
-			table_relative_dating, format_pg(code), format_pg(name)
-		))
+		cursor.execute("INSERT INTO %s VALUES (%%s, %%s);" % (table_relative_dating), (code, name))
 	
 	n_published = 0
 	for obj in cls_c14.get_members(direct_only = True):
@@ -536,35 +532,35 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		vRelative_Dating_Name = "; ".join(vRelative_Dating_Name)
 		vRelative_Dating_Order = sorted(list(vRelative_Dating_Order))
 		
-		cursor.execute("INSERT INTO %s VALUES (%s);" % (table_main, ", ".join([
-			format_pg(vArch14CZ_ID),
-			format_pg(vC_14_Lab_Code),
-			format_pg(vC_14_Activity),
-			format_pg(vC_14_Uncertainty),
-			format_pg(vC_14_CE_From),
-			format_pg(vC_14_CE_To),
-			format_pg(vC_14_Note),
-			format_pg(vReliability),
-			format_pg(vReliability_Note),
-			format_pg(vCountry),
-			format_pg(vCountryCode),
-			format_pg(vDistrict),
-			format_pg(vCadastre),
-			format_pg(vSite),
-			format_pg(vCoordinates),
-			format_pg(vContext_Name),
-			format_pg(vContext_Description),
-			format_pg(vContext_Depth),
-			format_pg(vActivity_Area),
-			format_pg(vFeature),
-			format_pg(vRelative_Dating_Name),
-			format_pg(vRelative_Dating_Order),
-			format_pg(vSample_Number),
-			format_pg(vSample_Note),
-			format_pg(vMaterial),
-			format_pg(vMaterial_Note),
-			format_pg(vSource),
-		])))
+		cursor.execute("INSERT INTO %s VALUES (%s);" % (table_main, ", ".join(["%s"]*27)), (
+			vArch14CZ_ID,
+			vC_14_Lab_Code,
+			vC_14_Activity,
+			vC_14_Uncertainty,
+			vC_14_CE_From,
+			vC_14_CE_To,
+			vC_14_Note,
+			vReliability,
+			vReliability_Note,
+			vCountry,
+			vCountryCode,
+			vDistrict,
+			vCadastre,
+			vSite,
+			vCoordinates,
+			vContext_Name,
+			vContext_Description,
+			vContext_Depth,
+			vActivity_Area,
+			vFeature,
+			vRelative_Dating_Name,
+			vRelative_Dating_Order,
+			vSample_Number,
+			vSample_Note,
+			vMaterial,
+			vMaterial_Note,
+			vSource,
+		))
 		n_published += 1
 	
 	conn.commit()

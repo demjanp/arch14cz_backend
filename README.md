@@ -18,6 +18,9 @@ Created on 5. 2. 2023
 
 ## About Arch14CZ - Backend <a name="about"></a>
 Backend graphical user interface for Arch14CZ - the database of archaeological radiocarbon dates of the Czech Republic.
+
+For the frontend interface see the [arch14cz_frontend](https://github.com/demjanp/arch14cz_frontend) project.
+
 ### Database Schema
 `TODO`
 
@@ -86,10 +89,9 @@ python start_arch14cz.py</code></pre>
 	File
 	SetupIconPath
 	UninstallIconPath</code></pre>
-3. Update absolute paths in `installer\arch14cz.spec`:
-`pathex=['..\\venv\\Lib\\site-packages'],` reflect the path to the virtual environment.
-4. Activate the virtual environment.
-5. Execute the following commands once per virtual environment:
+3. Update virtual environment path in `installer\arch14cz.spec` in the part `pathex=['..\\venv\\Lib\\site-packages'],`.
+5. Activate the virtual environment.
+6. Execute the following commands once per virtual environment:
 <pre><code>python -m pip install --upgrade build
 pip install pyinstaller</code></pre>
 6. Deactivate the virtual environment.
