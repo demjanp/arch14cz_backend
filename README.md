@@ -41,7 +41,14 @@ For a Windows installer see:
 `TODO`
 
 ### Choosing a Radiocarbon Calibration Curve
-`TODO`
+The software is supplied with the IntCal20 calibration curve by Reimer et al. [^1].
+
+You can download the latest calibration curves from the [IntCal](http://intcal.org/curves.html) website.
+
+1. In the Arch14CZ program, open the menu `Settings` and click on `Calibration Curve`.
+2. Select the file containing the calibration curve data.
+
+[^1]: <small>Reimer, P., Austin, W., Bard, E., Bayliss, A., Blackwell, P., Bronk Ramsey, C., Butzin, M., Cheng, H., Edwards, R., Friedrich, M., Grootes, P., Guilderson, T., Hajdas, I., Heaton, T., Hogg, A., Hughen, K., Kromer, B., Manning, S., Muscheler, R., Palmer, J., Pearson, C., van der Plicht, J., Reimer, R., Richards, D., Scott, E., Southon, J., Turney, C., Wacker, L., Adolphi, F., Büntgen, U., Capano, M., Fahrni, S., Fogtmann-Schulz, A., Friedrich, R., Köhler, P., Kudsk, S., Miyake, F., Olsen, J., Reinig, F., Sakamoto, M., Sookdeo, A. and Talamo, S. (2020) The IntCal20 Northern Hemisphere radiocarbon age calibration curve (0–55 cal kBP). Radiocarbon, 62(4), pp.725-757. doi:10.1017/RDC.2020.41</small>
 
 ### Publishing Data
 `TODO`
