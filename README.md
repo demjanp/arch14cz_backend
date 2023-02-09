@@ -45,6 +45,7 @@ The software is supplied with the IntCal20 calibration curve by Reimer et al. [^
 
 You can download the latest calibration curves from the [IntCal](http://intcal.org/curves.html) website.
 
+To load the calibration curve:
 1. In the Arch14CZ program, open the menu `Settings` and click on `Calibration Curve`.
 2. Select the file containing the calibration curve data.
 
