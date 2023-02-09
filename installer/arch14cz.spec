@@ -6,7 +6,7 @@ block_cipher = None
 
 a = Analysis(
     ['..\\bin\\start_arch14cz.py'],
-    pathex=['d:\\data_processed\\Arch14CZ\\venv\\Lib\\site-packages\\'],
+    pathex=['..\\venv\\Lib\\site-packages\\'],
     binaries=[],
     datas=[],
     hiddenimports=[
