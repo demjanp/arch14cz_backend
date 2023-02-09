@@ -181,16 +181,31 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		"SELECT table_name FROM information_schema.tables WHERE table_schema = '%s';" % (schema)
 	)
 	tables = [row[0] for row in cursor.fetchall()]
-	for name in [
+	table_names = set([
 		table_main, table_country, table_district, table_cadastre, 
 		table_activity_area, table_feature, table_material, table_relative_dating,
-	]:
+	])
+	for name in table_names:
 		cnt += 1
 		progress.update_state(value = cnt, maximum = cmax)
 		if progress.cancel_pressed():
 			return n_published, n_rows, ["Cancelled by user"]
 		if name in tables:
 			cursor.execute("DROP TABLE IF EXISTS \"%s\";" % (name))
+	
+	# wait until tables are deleted
+	conn.commit()
+	while True:
+		cursor = conn.cursor()
+		cursor.execute(
+			"SELECT table_name FROM information_schema.tables WHERE table_schema = '%s';" % (schema)
+		)
+		tables = set([row[0] for row in cursor.fetchall()])
+		if (not tables) or (not tables.issubset(table_names)):
+			break
+		if progress.cancel_pressed():
+			return n_published, n_rows, ["Cancelled by user"]
+		time.sleep(0.5)
 	
 	if table_main not in tables:
 		cursor.execute('''CREATE TABLE %s (
@@ -252,17 +267,15 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	if progress.cancel_pressed():
 		return n_published, n_rows, ["Cancelled by user"]
 	
-	conn.commit()
-	
 	# wait until tables are created on server
-	cursor = conn.cursor()
-	tables = []
-	while not tables:
+	conn.commit()
+	tables = set([])
+	while not tables.issubset(table_names):
 		cursor = conn.cursor()
 		cursor.execute(
 			"SELECT table_name FROM information_schema.tables WHERE table_schema = '%s';" % (schema)
 		)
-		tables = [row[0] for row in cursor.fetchall()]
+		tables = set([row[0] for row in cursor.fetchall()])
 		if progress.cancel_pressed():
 			return n_published, n_rows, ["Cancelled by user"]
 		time.sleep(0.5)
