@@ -1,0 +1,64 @@
+
+<Title>C14 Form</>
+<Type EntryForm/>
+		<ColumnBreak/>
+<Group style="QGroupBox {font-weight: bold;}">Cadastre
+	<ComboBox Cadastre.Name style="">Cadastre</>
+	<ComboBox District.Name style="">District</>
+	<ComboBox Country.Name style="">Country</>
+</>
+<Group style="QGroupBox {font-weight: bold;}">Site
+	<LineEdit Site.Name style="">Name</>
+	<LineEdit Site.Location style="">Coordinates</>
+	<PlainTextEdit Site.Note style="">Note</>
+</>
+<Group style="QGroupBox {font-weight: bold;}">Context
+	<LineEdit Context.Name style="">Name</>
+	<LineEdit Context.Depth style="">Depth</>
+	<ComboBox Component.Name style="">Component</>
+	<ComboBox Feature.Name style="">Feature</>
+	<PlainTextEdit Context.Description style="">Description</>
+</>
+<MultiGroup style="QGroupBox {font-weight: bold;}">Relative dating
+	<ComboBox Relative_Dating.Name style="">Name</>
+</>
+<Group style="QGroupBox {font-weight: bold;}">Dating Reliability
+	<ComboBox Reliability.Name style="">Description</>
+</>
+<ColumnBreak/>
+<Group style="QGroupBox {font-weight: bold;}">Sample
+	<LineEdit Sample.Number style="">Number</>
+	<LineEdit Sample.Description style="">Description</>
+</>
+<Group style="QGroupBox {font-weight: bold;}">Fraction
+	<LineEdit Fraction.Number style="">Number</>
+	<ComboBox Fraction.Name style="">Name</>
+</>
+<Group style="QGroupBox {font-weight: bold;}">Material
+	<ComboBox Material.Name style="">Name</>
+</>
+<Group style="QGroupBox {font-weight: bold;}">14C Analysis
+	<LineEdit C_14_Analysis.Lab_Code style="">Lab code</>
+	<LineEdit C_14_Analysis.C_14_Activity_BP style="">14C activity BP</>
+	<LineEdit C_14_Analysis.C_14_Uncertainty_1Sig style="">14C uncert. 1sig</>
+	<ComboBox C_14_Method.Name style="">14C method</>
+	<LineEdit C_14_Analysis.Delta_C_13_per_mil style="">δ 13C per mil.</>
+	<LineEdit C_14_Analysis.Delta_C_13_Uncertainty_1Sig style="">δ 13C uncert.</>
+	<ComboBox C_13_Method.Name style="">13C method</>
+	<CheckBox C_14_Analysis.Public style="">Public</>
+	<LineEdit C_14_Analysis.Note_Analysis style="">Note - Analysis</>
+	<LineEdit C_14_Analysis.Note_Material style="">Note - Material</>
+	<LineEdit C_14_Analysis.Note_Relative_Dating style="">Note - Relative dating</>
+</>
+<MultiGroup style="QGroupBox {font-weight: bold;}">Source
+	<PlainTextEdit Source.Description style="">Description</>
+	<LineEdit Source.Reference style="">Reference</>
+	<LineEdit Source.URI style="">URI</>
+</>
+<Group style="QGroupBox {font-weight: bold;}">Submitter
+	<ComboBox Submitter.Name style="">Name</>
+	<ComboBox Submitter.Organization style="">Organization</>
+	<LineEdit Submitter.Note style="">Note</>
+</>
+<Unique C_14_Analysis/>
+<Unique Context/>

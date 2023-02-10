@@ -5,7 +5,7 @@ from deposit.utils.fnc_files import (as_url)
 from deposit.utils.fnc_serialize import (encrypt_password)
 
 from arch14cz_backend.utils.fnc_frontend import (check_connection, publish_data)
-from arch14cz_backend.utils.fnc_import import (import_xlsx)
+from arch14cz_backend.utils.fnc_import import (create_schema, import_xlsx)
 
 import arch14cz_backend
 
@@ -24,6 +24,21 @@ class CModel(DCModel):
 	
 	# ---- Signal handling
 	# ------------------------------------------------------------------------
+	def on_added(self, objects, classes):
+		# elements = [DObject, DClass, ...]
+		
+		self.cmain.cactions.update()
+	
+	def on_deleted(self, objects, classes):
+		# elements = [obj_id, name, ...]
+		
+		self.cmain.cactions.update()
+	
+	def on_changed(self, objects, classes):
+		# elements = [DObject, DClass, ...]
+		
+		self.cmain.cactions.update()
+	
 	def on_saved(self, datasource):
 		
 		self.cmain.cview.set_status_message("Saved: %s" % (str(datasource)))
@@ -33,6 +48,7 @@ class CModel(DCModel):
 		
 		self.update_model_info()
 		self.cmain.cactions.update()
+	
 	
 	# ---- get/set
 	# ------------------------------------------------------------------------
@@ -109,6 +125,10 @@ class CModel(DCModel):
 				n_published, n_rows, "\n".join(errors)
 			)
 		)
+	
+	def create_schema(self):
+		
+		create_schema(self)
 	
 	def import_excel(self, path, fields):
 		# fields[name] = column index

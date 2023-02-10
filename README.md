@@ -105,7 +105,7 @@ pip install pyinstaller</code></pre>
 6. Deactivate the virtual environment.
 7. Run `build.bat`.
 8. Run InstallForge and open the file `installer\arch14cz_installer.ifp`.
-9. Using the Build command in InstallForge to build the installer.
+9. Use the Build command in InstallForge to build the installer.
 
 ## Contact: <a name="contact"></a>
 Peter Demján (peter.demjan@gmail.com)

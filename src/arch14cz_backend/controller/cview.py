@@ -165,6 +165,10 @@ class CView(AbstractSubcontroller):
 			return
 		self._view.set_recent_dir(path)
 	
+	def set_status_message(self, text):
+		
+		self._view.statusbar.message(text)
+	
 	def log_message(self, text):
 		
 		self._view.logging.append(text)

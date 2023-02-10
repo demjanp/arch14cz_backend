@@ -1,5 +1,84 @@
+from deposit.utils.fnc_serialize import (load_user_tool)
+import arch14cz_backend
+
 from openpyxl import load_workbook
 from copy import deepcopy
+import os
+
+def create_schema(cmodel):
+	# create database schema, data entry & search form
+	#
+	# returns cls_lookup = {class_name: Class, ...}
+	
+	has_form = False
+	has_search = False
+	for data in cmodel.get_user_tools():
+		if (data["typ"] == "EntryForm") and (data["label"] == "C14 Form"):
+			has_form = True
+		if (data["typ"] == "SearchForm") and (data["label"] == "C14 Search"):
+			has_search = True
+	folder = os.path.dirname(arch14cz_backend.__file__)
+	if not has_form:
+		path = os.path.join(folder, "c14_entry_form.txt")
+		data = load_user_tool(path)
+		cmodel.add_user_tool(data)
+	if not has_search:
+		path = os.path.join(folder, "c14_search.txt")
+		data = load_user_tool(path)
+		cmodel.add_user_tool(data)
+	
+	main_descriptors = [
+		"Lab_Code",
+		"C_14_Activity_BP",
+		"C_14_Uncertainty_1Sig",
+		"Delta_C_13_per_mil",
+		"Note_Analysis",
+		"Note_Material",
+		"Note_Sample",
+		"Note_Reliability",
+	]
+	
+	other_descriptors = {
+		"Site":				["Name", "Location", "Note"],
+		"Context":			["Name", "Description", "Depth"],
+		"Source":			["Description", "Reference", "URI"],
+		"Activity_Area":	["Name"],
+		"Feature":			["Name"],
+		"Sample":			["Number"],
+		"Material":			["Name"],
+		"Reliability":		["Name"],
+		"C_14_Method":		["Name"],
+		"Country":			["Name"],
+		"District":			["Name"],
+		"Cadastre":			["Name", "Code"],
+	}
+	
+	cls_lookup = {}
+	for cls_name in ["C_14_Analysis", "Relative_Dating"] + list(other_descriptors.keys()):
+		cls_lookup[cls_name] = cmodel.add_class(cls_name)
+	
+	for name in main_descriptors:
+		cls_lookup["C_14_Analysis"].set_descriptor(name)
+	cls_lookup["Relative_Dating"].set_descriptor("Name")
+	for cls_name in other_descriptors:
+		for name in other_descriptors[cls_name]:
+			cls_lookup[cls_name].set_descriptor(name)
+	
+	cls_lookup["Source"].add_relation("C_14_Analysis", "describes")
+	cls_lookup["C_14_Analysis"].add_relation("Reliability", "descr")
+	cls_lookup["C_14_Analysis"].add_relation("C_14_Method", "descr")
+	cls_lookup["C_14_Analysis"].add_relation("Sample", "analyses")
+	cls_lookup["Sample"].add_relation("Material", "descr")
+	cls_lookup["Context"].add_relation("Sample", "contains")
+	cls_lookup["Context"].add_relation("Feature", "descr")
+	cls_lookup["Site"].add_relation("Context", "contains")
+	cls_lookup["Context"].add_relation("Activity_Area", "descr")
+	cls_lookup["Cadastre"].add_relation("Site", "contains")
+	cls_lookup["District"].add_relation("Cadastre", "contains")
+	cls_lookup["Country"].add_relation("District", "contains")
+	cls_lookup["Relative_Dating"].add_relation("Context", "dates")
+	
+	return cls_lookup
 
 def import_xlsx(cmodel, path, fields, progress):
 	# fields[name] = column index
@@ -33,8 +112,7 @@ def import_xlsx(cmodel, path, fields, progress):
 	
 	other_data = {
 		"Site": [],				# [{Name, Location, Note}, ...]
-		"Context": [],			# [{Name, Note, Description}, ...]
-		"Source": [],			# [{Description, Reference, URI}, ...]
+		"Context": [],			# [{Name, Description, Depth}, ...]
 		"Activity_Area": [],	# [{Name}, ...]
 		"Feature": [],			# [{Name}, ...]
 		"Sample": [],			# [{Number}, ...]
@@ -43,11 +121,12 @@ def import_xlsx(cmodel, path, fields, progress):
 		"C_14_Method": [],		# [{Name}, ...]
 		"Country": [],			# [{Name}, ...]
 		"District": [],			# [{Name}, ...]
-		"Cadastre": [],			# [{Name}, ...]
+		"Cadastre": [],			# [{Name, Code}, ...]
 	}
 	
 	relative_datings = []
 	relative_datings_general = set([])  # without Relative Dating Note
+	sources = []
 	
 	wb = load_workbook(filename = path, read_only = True)
 	for sheet in wb.sheetnames:
@@ -187,6 +266,7 @@ def import_xlsx(cmodel, path, fields, progress):
 				other_data[key].append(deepcopy(row_data[key]))
 				row_idxs[key] = len(other_data[key]) - 1
 		
+		source_idxs = []
 		sources_row = [
 			{
 				"Description": source_description,
@@ -200,11 +280,11 @@ def import_xlsx(cmodel, path, fields, progress):
 			},			
 		]
 		for data in sources_row:
-			if data in other_data["Source"]:
-				row_idxs["Source"] = other_data["Source"].index(data)
+			if data in sources:
+				source_idxs.append(sources.index(data))
 			else:
-				other_data["Source"].append(deepcopy(data))
-				row_idxs["Source"] = len(other_data["Source"]) - 1
+				sources.append(data)
+				source_idxs.append(len(sources) - 1)
 		
 		relative_dating_idxs = []
 		for name in relative_datings_row:
@@ -224,29 +304,15 @@ def import_xlsx(cmodel, path, fields, progress):
 			"Note_Sample": sample_note,
 			"Note_Reliability": reliability_note,
 		}
-		c14_data.append([deepcopy(c_14_analysis), deepcopy(row_idxs), deepcopy(relative_dating_idxs)])
+		c14_data.append([deepcopy(c_14_analysis), deepcopy(row_idxs), deepcopy(relative_dating_idxs), deepcopy(source_idxs)])
 	
 	relative_datings_to_add = sorted(list(relative_datings_general.difference(relative_datings)))
 	
-	cls_lookup = {}
-	for cls_name in ["C_14_Analysis", "Relative_Dating"] + list(other_data.keys()):
-		cls_lookup[cls_name] = cmodel.add_class(cls_name)
-	cls_lookup["Source"].add_relation("C_14_Analysis", "describes")
-	cls_lookup["C_14_Analysis"].add_relation("Reliability", "descr")
-	cls_lookup["C_14_Analysis"].add_relation("C_14_Method", "descr")
-	cls_lookup["C_14_Analysis"].add_relation("Sample", "analyses")
-	cls_lookup["Sample"].add_relation("Material", "descr")
-	cls_lookup["Context"].add_relation("Sample", "contains")
-	cls_lookup["Context"].add_relation("Feature", "descr")
-	cls_lookup["Site"].add_relation("Context", "contains")
-	cls_lookup["Context"].add_relation("Activity_Area", "descr")
-	cls_lookup["Cadastre"].add_relation("Site", "contains")
-	cls_lookup["District"].add_relation("Cadastre", "contains")
-	cls_lookup["Country"].add_relation("District", "contains")
-	cls_lookup["Relative_Dating"].add_relation("Context", "dates")
+	cls_lookup = create_schema(cmodel)
 	
 	obj_lookup = dict([(cls_name, {}) for cls_name in other_data]) # {cls_name: {idx: Object, ...}, ...}
 	obj_lookup["Relative_Dating"] = {}
+	obj_lookup["Source"] = {}
 	
 	cls = cls_lookup["Relative_Dating"]
 	for idx, name in enumerate(relative_datings):
@@ -254,11 +320,15 @@ def import_xlsx(cmodel, path, fields, progress):
 	for name in relative_datings_to_add:
 		find_or_add_obj(cls, {"Name": name})
 	
+	cls = cls_lookup["Source"]
+	for idx, data in enumerate(sources):
+		obj_lookup["Source"][idx] = find_or_add_obj(cls, data)
+	
 	for cls_name in other_data:
 		for idx, data in enumerate(other_data[cls_name]):
 			obj_lookup[cls_name][idx] = find_or_add_obj(cls_lookup[cls_name], data)
 	
-	for c_14_analysis, other_idxs, relative_dating_idxs in c14_data:
+	for c_14_analysis, other_idxs, relative_dating_idxs, source_idxs in c14_data:
 		
 		row_n += 1
 		progress.update_state(value = row_n)
@@ -269,7 +339,6 @@ def import_xlsx(cmodel, path, fields, progress):
 		
 		obj_site = obj_lookup["Site"][other_idxs["Site"]]
 		obj_context = obj_lookup["Context"][other_idxs["Context"]]
-		obj_source = obj_lookup["Source"][other_idxs["Source"]]
 		obj_feature = obj_lookup["Feature"][other_idxs["Feature"]]
 		obj_activity_area = obj_lookup["Activity_Area"][other_idxs["Activity_Area"]]
 		obj_sample = obj_lookup["Sample"][other_idxs["Sample"]]
@@ -280,7 +349,6 @@ def import_xlsx(cmodel, path, fields, progress):
 		obj_district = obj_lookup["District"][other_idxs["District"]]
 		obj_cadastre = obj_lookup["Cadastre"][other_idxs["Cadastre"]]
 		
-		obj_source.add_relation(obj_c_14, "describes")
 		obj_c_14.add_relation(obj_reliability, "descr")
 		obj_c_14.add_relation(obj_method, "descr")
 		obj_c_14.add_relation(obj_sample, "analyses")
@@ -295,6 +363,9 @@ def import_xlsx(cmodel, path, fields, progress):
 		
 		for idx in relative_dating_idxs:
 			obj_lookup["Relative_Dating"][idx].add_relation(obj_context, "dates")
+		
+		for idx in source_idxs:
+			obj_lookup["Source"][idx].add_relation(obj_c_14, "describes")
 	
 	progress.stop()
 	

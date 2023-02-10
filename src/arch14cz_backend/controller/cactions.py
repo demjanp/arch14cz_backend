@@ -44,6 +44,7 @@ class CActions(DCActions):
 				("Deposit", "Open"),
 				None,
 				("AutoBackup", "Backup backend after every save"),
+				("CreateSchema", "Create Schema"),
 				("ImportExcel", "Import Excel Data"),
 			],
 			"Frontend": [
@@ -178,6 +179,23 @@ class CActions(DCActions):
 	def on_AutoBackup(self, state):
 		
 		self.cmain.cmodel.set_auto_backup(state)
+	
+	
+	def update_CreateSchema(self):
+		
+		return dict(
+			help = "Create Arch14CZ Schema in the Database",
+			checkable = False,
+			enabled = True,
+		)
+	
+	def on_CreateSchema(self, state):
+		
+		if self.cmain.cview.show_question(
+			"Create Schema",
+			"Create the Arch14CZ schema in the database?"
+		):
+			self.cmain.cmodel.create_schema()
 	
 	
 	def update_CalCurve(self):
