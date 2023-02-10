@@ -94,18 +94,26 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	# names = {obj_id: name, ...}
 	# circulars = [obj_id, ...]
 	
+	def cancel_progress(n_published, n_rows, errors):
+		
+		cmodel._model.blockSignals(False)
+		cmodel.on_changed([],[])
+		return n_published, n_rows, errors
+	
+	cmodel._model.blockSignals(True)
+	
 	if circulars:
 		errors = ["Circular relations found between the following datings:"]
 		for obj_id in circulars:
 			errors.append("\t%s" % (names[obj_id]))
-		return n_published, n_rows, errors
+		return cancel_progress(n_published, n_rows, errors)
 	
 	cls = cmodel.get_class("Relative_Dating")
 	if cls is None:
-		return n_published, n_rows, ["Relative_Dating Class not found"]
+		return cancel_progress(n_published, n_rows, ["Relative_Dating Class not found"])
 	for obj in cls.get_members(direct_only = True):
 		if progress.cancel_pressed():
-			return n_published, n_rows, ["Cancelled by user"]
+			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		phase_min, phase_max = phasing[obj.id]
 		obj.set_descriptor("Order_Min", phase_min)
 		obj.set_descriptor("Order_Max", phase_max)
@@ -114,7 +122,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	arch_ids = set([])
 	cls_c14 = cmodel.get_class("C_14_Analysis")
 	if cls_c14 is None:
-		return n_published, n_rows, ["C_14_Analysis Class not found"]
+		return cancel_progress(n_published, n_rows, ["C_14_Analysis Class not found"])
 	for obj in cls_c14.get_members(direct_only = True):
 		n_rows += 1
 		arch_id = obj.get_descriptor("Arch14CZ_ID")
@@ -123,7 +131,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	datestr = datetime.now().strftime("%d-%m-%Y")
 	for obj in cls_c14.get_members(direct_only = True):
 		if progress.cancel_pressed():
-			return n_published, n_rows, ["Cancelled by user"]
+			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		arch_id = obj.get_descriptor("Arch14CZ_ID")
 		if arch_id is None:
 			n = 0
@@ -142,7 +150,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	for obj in cls_c14.get_members(direct_only = True):
 		progress.update_state(value = cnt, maximum = cmax)
 		if progress.cancel_pressed():
-			return n_published, n_rows, ["Cancelled by user"]
+			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		cnt += 1
 		ce_from = obj.get_descriptor("CE_From")
 		ce_to = obj.get_descriptor("CE_To")
@@ -175,7 +183,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		conn = psycopg2.connect(**frontend_connection)
 	except:
 		_, exc_value, _ = sys.exc_info()
-		return n_published, n_rows, [str(exc_value)]
+		return cancel_progress(n_published, n_rows, [str(exc_value)])
 	cursor = conn.cursor()
 	cursor.execute(
 		"SELECT table_name FROM information_schema.tables WHERE table_schema = '%s';" % (schema)
@@ -189,7 +197,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		cnt += 1
 		progress.update_state(value = cnt, maximum = cmax)
 		if progress.cancel_pressed():
-			return n_published, n_rows, ["Cancelled by user"]
+			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		if name in tables:
 			cursor.execute("DROP TABLE IF EXISTS \"%s\";" % (name))
 	
@@ -204,7 +212,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		if (not tables) or (not tables.issubset(table_names)):
 			break
 		if progress.cancel_pressed():
-			return n_published, n_rows, ["Cancelled by user"]
+			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		time.sleep(0.5)
 	
 	if table_main not in tables:
@@ -242,7 +250,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		cnt += 1
 		progress.update_state(value = cnt, maximum = cmax)
 		if progress.cancel_pressed():
-			return n_published, n_rows, ["Cancelled by user"]
+			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		if name not in tables:
 			cursor.execute('''CREATE TABLE %s (
 				"Name" TEXT
@@ -251,7 +259,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		cnt += 1
 		progress.update_state(value = cnt, maximum = cmax)
 		if progress.cancel_pressed():
-			return n_published, n_rows, ["Cancelled by user"]
+			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		if name not in tables:
 			cursor.execute('''CREATE TABLE %s (
 				"Code" TEXT,
@@ -265,7 +273,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
-		return n_published, n_rows, ["Cancelled by user"]
+		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	
 	# wait until tables are created on server
 	conn.commit()
@@ -277,7 +285,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		)
 		tables = set([row[0] for row in cursor.fetchall()])
 		if progress.cancel_pressed():
-			return n_published, n_rows, ["Cancelled by user"]
+			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		time.sleep(0.5)
 	
 	progress.update_state(text = "Collecting data", value = cnt, maximum = cmax)
@@ -304,7 +312,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	for row in range(len(query)):
 		progress.update_state(value = cnt, maximum = cmax)
 		if progress.cancel_pressed():
-			return n_published, n_rows, ["Cancelled by user"]
+			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		cnt += 1
 		
 		obj_id = query[row, "C_14_Analysis", "Arch14CZ_ID"][0]
@@ -346,7 +354,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
-		return n_published, n_rows, ["Cancelled by user"]
+		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	
 	lookup_Activity_Area = {}   # {obj_id: Name, ...}
 	query = cmodel.get_query(
@@ -359,7 +367,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
-		return n_published, n_rows, ["Cancelled by user"]
+		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	
 	lookup_Feature = {}   # {obj_id: Name, ...}
 	query = cmodel.get_query(
@@ -372,7 +380,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
-		return n_published, n_rows, ["Cancelled by user"]
+		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	
 	lookup_Material = {}   # {obj_id: Name, ...}
 	query = cmodel.get_query(
@@ -385,7 +393,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
-		return n_published, n_rows, ["Cancelled by user"]
+		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	
 	lookup_Source = defaultdict(list)  # {obj_id: [{Description, URI, Reference}, ...], ...}
 	query = cmodel.get_query(
@@ -402,7 +410,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
-		return n_published, n_rows, ["Cancelled by user"]
+		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	
 	lookup_Relative_Dating = defaultdict(list)  # {obj_id: [{Name, Order_Min, Order_Max}, ...], ...}
 	query = cmodel.get_query(
@@ -419,7 +427,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
-		return n_published, n_rows, ["Cancelled by user"]
+		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	
 	query = cmodel.get_query(
 		"SELECT Relative_Dating.Name, Relative_Dating.Order_Min, Relative_Dating.Order_Max",
@@ -434,7 +442,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
-		return n_published, n_rows, ["Cancelled by user"]
+		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	
 	progress.update_state(text = "Storing data", value = cnt, maximum = cmax)
 	
@@ -457,7 +465,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		cnt += 1
 		progress.update_state(value = cnt, maximum = cmax)
 		if progress.cancel_pressed():
-			return n_published, n_rows, ["Cancelled by user"]
+			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		for value in data:
 			if value:
 				cursor.execute("INSERT INTO %s VALUES (%%s);" % (name), (value,))
@@ -465,7 +473,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
-		return n_published, n_rows, ["Cancelled by user"]
+		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	for district, country_code in dict_district:
 		if district:
 			code = "%s#%s" % (district, country_code)
@@ -475,7 +483,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
-		return n_published, n_rows, ["Cancelled by user"]
+		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	for cadastre, district, country_code in dict_cadastre:
 		if cadastre:
 			code = "%s#%s#%s" % (cadastre, district, country_code)
@@ -485,7 +493,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
-		return n_published, n_rows, ["Cancelled by user"]
+		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	for name, order_min, order_max in dict_relative_dating:
 		code = "%d#%d" % (order_min, order_max)
 		cursor.execute("INSERT INTO %s VALUES (%%s, %%s);" % (table_relative_dating), (code, name))
@@ -496,7 +504,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		cnt += 1
 		progress.update_state(value = cnt, maximum = cmax)
 		if progress.cancel_pressed():
-			return n_published, n_rows, ["Cancelled by user"]
+			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		
 		obj_id = obj.id
 		vC_14_Activity = float_or_none(obj.get_descriptor("C_14_Activity_BP"))
@@ -579,5 +587,5 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	conn.commit()
 	conn.close()
 	
-	return n_published, n_rows, errors
+	return cancel_progress(n_published, n_rows, errors)
 

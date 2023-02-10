@@ -308,6 +308,8 @@ def import_xlsx(cmodel, path, fields, progress):
 	
 	relative_datings_to_add = sorted(list(relative_datings_general.difference(relative_datings)))
 	
+	cmodel._model.blockSignals(True)
+	
 	cls_lookup = create_schema(cmodel)
 	
 	obj_lookup = dict([(cls_name, {}) for cls_name in other_data]) # {cls_name: {idx: Object, ...}, ...}
@@ -321,8 +323,25 @@ def import_xlsx(cmodel, path, fields, progress):
 		find_or_add_obj(cls, {"Name": name})
 	
 	cls = cls_lookup["Source"]
+	
+	source_lookup = {}
+	for obj in cls.get_members(direct_only = True):
+		key = (obj.get_descriptor("Description"), obj.get_descriptor("Reference"), obj.get_descriptor("URI"))
+		source_lookup[key] = obj
+	
+	progress.update_state(value = row_n, maximum = n_rows * 2 + len(sources))
 	for idx, data in enumerate(sources):
-		obj_lookup["Source"][idx] = find_or_add_obj(cls, data)
+		row_n += 1
+		progress.update_state(value = row_n)
+		if progress.cancel_pressed():
+			cmodel._model.blockSignals(False)
+			cmodel.on_changed([],[])
+			return 0, n_rows, ["Cancelled by user"]
+		key = (data["Description"], data["Reference"], data["URI"])
+		if key in source_lookup:
+			obj_lookup["Source"][idx] = source_lookup[key]
+		else:
+			obj_lookup["Source"][idx] = cmodel.add_object_with_descriptors(cls, data)
 	
 	for cls_name in other_data:
 		for idx, data in enumerate(other_data[cls_name]):
@@ -333,6 +352,8 @@ def import_xlsx(cmodel, path, fields, progress):
 		row_n += 1
 		progress.update_state(value = row_n)
 		if progress.cancel_pressed():
+			cmodel._model.blockSignals(False)
+			cmodel.on_changed([],[])
 			return 0, n_rows, ["Cancelled by user"]
 		
 		obj_c_14 = find_or_add_obj(cls_lookup["C_14_Analysis"], c_14_analysis)
@@ -368,5 +389,7 @@ def import_xlsx(cmodel, path, fields, progress):
 			obj_lookup["Source"][idx].add_relation(obj_c_14, "describes")
 	
 	progress.stop()
+	cmodel._model.blockSignals(False)
+	cmodel.on_changed([],[])
 	
 	return len(c14_data), n_rows, errors
