@@ -3,9 +3,7 @@ Backend interface for Arch14CZ - the database of archaeological radiocarbon date
 
 Created on 14. 12. 2021
 
-<details>
-<summary>Table of Contents</summary>
-
+**Table of Contents**
 1. [About Arch14CZ](#about)
    1. [Database Schema](#schema)
 2. [Installation](#installation)
@@ -23,8 +21,6 @@ Created on 14. 12. 2021
 5. [Contact](#contact)
 6. [Acknowledgements](#acknowledgements)
 7. [License](#license)
-
-</details>
 
 ## About Arch14CZ - Backend <a name="about"></a>
 Backend graphical user interface for Arch14CZ - the database of archaeological radiocarbon dates of the Czech Republic.
