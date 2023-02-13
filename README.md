@@ -59,10 +59,8 @@ PostgreSQL Relational is a special format to preserve maximum compatibility of D
 3. Click on `C14 Form` on the `User Tools` toolbar.
 4. Fill in the form and click `Submit`.
 
-<details>
-<summary>Example of a filled entry form</summary>
+*Example of a filled entry form.*
 <img src="entry_form.png">
-</details>
 
 All field groups except `Relative Dating` and `Source` have a drop-down list, with the possibility to look up if an entry is already present in the database and use the `Fill` button to fill it in. 
 
