@@ -34,6 +34,10 @@ For a Windows installer see:
 [https://github.com/demjanp/arch14cz_backend/releases/latest](https://github.com/demjanp/arch14cz_backend/releases/latest)
 
 ## Usage <a name="usage"></a>
+The Arch14CZ backend interface is used to connect to the backend database, enter new data or import it from an Excel file, order relative datings and publish the data to the frontend database.
+
+>Note that after adding an entry or entries with a new relative dating, appropriate chronological relations have to be added to it before it can be published to the frontend database.
+
 ### Connecting to a Backend Database
 To connect to a backend database, use the command `Backend` -> `Connect` and select a data source. The data source can be either a local file (Pickle and JSON formats) or a PostgreSQL database.
 
@@ -71,67 +75,65 @@ For the frontend database to function properly, all relative datings have to be 
 Data can be imported from an Excel (.xlsx) file via the menu `Backend` -> `Import Excel Data`. For an example, see [import_sample.xlsx](import_sample.xlsx). 
 
 The file has to contain the following columns:
-<pre><code>
-Lab Code
-C-14 Activity BP:
+1. Lab Code
+2. C-14 Activity BP:
     C-14 measurement in radiocarbon (uncalibrated) years BP
-C-14 Uncertainty 1 Sigma:
+3. C-14 Uncertainty 1 Sigma:
     1-sigma uncertainty of the measurement
-Date Type:
+4. Date Type:
     Type of the C-14 data (usually 'conv. 14C BP')
-C-14 Method:
+5. C-14 Method:
     AMS or conventional
-Delta C-13:
+6. Delta C-13:
     Delta C-13 measurement
-C-14 Analysis Note
-Country
-Cadastre
-Cadastre Code:
+7. C-14 Analysis Note
+8. Country
+9. Cadastre
+10. Cadastre Code:
     Code of the cadastre (see https://www.czso.cz/csu/rso/katastralni_uzemi_rso).
-District
-Site Name
-Site Coordinates:
+11. District
+12. Site Name
+13. Site Coordinates:
     WGS 84 standard, format XX.XXXXXXXN, XX.XXXXXXXE
-Site Note
-Activity Area:
+14. Site Note
+15. Activity Area:
     Type of the archaeological activity area (e.g., settlement, cemetery).
-Feature:
+16. Feature:
     Type of the archaeological feature (e.g. storage pit, grave).
-Context Name:
+17. Context Name:
     Identifier of the context within the site (e.g., Feature 123).
-Context Description
-Context Depth cm:
+18. Context Description
+19. Context Depth cm:
     Depth at which the sample was retrieved.
-Relative Dating Name 1:
+20. Relative Dating Name 1:
     Relative dating of the context, as detailed as possible (e.g., Lengyel Culture, phase I).
-Relative Dating Name 2:
+21. Relative Dating Name 2:
     Additional relative dating.
-Sample Number:
+22. Sample Number:
     Inventory number of the dated sample.
-Sample Note
-Material Name
-Material Note
-Reliability:
-    Reliability of the C-14 dating in respect to the archaeological context.
-    Possible values:
-        no problems declared
-        in contradiction with archaeological chronology/sequence
-        no archaeological finds associated
-        context disturbation
-        other problems
-        sample contamination
-Reliability Note
-Source Description:
+23. Sample Note
+24. Material Name
+25. Material Note
+26. Reliability:
+    Reliability of the C-14 dating in respect to the archaeological context. Possible values:
+    <pre>no problems declared
+    in contradiction with archaeological chronology/sequence
+    no archaeological finds associated
+    context disturbation
+    other problems
+    sample contamination
+    </pre>
+27. Reliability Note
+28. Source Description:
     Citation of the source.
-Source Reference:
+29. Source Reference:
     Reference to page or figure.
-Source URI:
+30. Source URI:
     DOI or aleph link (where applicable).
-Source Acquisition:
+31. Source Acquisition:
     Original source of the data (Arch14CZ, C14.sk or other database) 
-Submitter Name
-Submitter Organization
-</code></pre>
+32. Submitter Name
+33. Submitter Organization
 
 ### Choosing a Radiocarbon Calibration Curve
 The software is supplied with the IntCal20 calibration curve by Reimer et al. [^1].
