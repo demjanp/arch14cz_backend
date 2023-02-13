@@ -54,7 +54,7 @@ class CView(AbstractSubcontroller):
 	@QtCore.Slot()
 	def on_open_clicked(self):
 		
-		self.cmain.open_deposit("SELECT [C_14_Analysis].*")
+		self.cmain.open_deposit()
 	
 	@QtCore.Slot()
 	def on_import_clicked(self):

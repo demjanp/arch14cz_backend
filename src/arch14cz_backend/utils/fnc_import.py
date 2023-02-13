@@ -32,6 +32,7 @@ def create_schema(cmodel):
 		"C_14_Activity_BP",
 		"C_14_Uncertainty_1Sig",
 		"Delta_C_13_per_mil",
+		"Public",
 		"Note_Analysis",
 		"Note_Material",
 		"Note_Sample",
@@ -51,6 +52,7 @@ def create_schema(cmodel):
 		"Country":			["Name"],
 		"District":			["Name"],
 		"Cadastre":			["Name", "Code"],
+		"Submitter":		["Name", "Organization"],
 	}
 	
 	cls_lookup = {}
@@ -68,6 +70,7 @@ def create_schema(cmodel):
 	cls_lookup["C_14_Analysis"].add_relation("Reliability", "descr")
 	cls_lookup["C_14_Analysis"].add_relation("C_14_Method", "descr")
 	cls_lookup["C_14_Analysis"].add_relation("Sample", "analyses")
+	cls_lookup["C_14_Analysis"].add_relation("Submitter", "descr")
 	cls_lookup["Sample"].add_relation("Material", "descr")
 	cls_lookup["Context"].add_relation("Sample", "contains")
 	cls_lookup["Context"].add_relation("Feature", "descr")
@@ -122,6 +125,7 @@ def import_xlsx(cmodel, path, fields, progress):
 		"Country": [],			# [{Name}, ...]
 		"District": [],			# [{Name}, ...]
 		"Cadastre": [],			# [{Name, Code}, ...]
+		"Submitter": [],		# [{Name, Organization}, ...]
 	}
 	
 	relative_datings = []
@@ -145,14 +149,13 @@ def import_xlsx(cmodel, path, fields, progress):
 		row_n += 1
 		row_data = {}
 		
-		c14_lab_code = get_from_field("C-14 Analysis Lab Code", fields, row)
-		c14_activity = get_from_field("C-14 Analysis C-14 Activity BP", fields, row)
-		c14_uncert = get_from_field("C-14 Analysis C-14 Uncert. 1 Sigma", fields, row)
+		c14_lab_code = get_from_field("Lab Code", fields, row)
+		c14_activity = get_from_field("C-14 Activity BP", fields, row)
+		c14_uncert = get_from_field("C-14 Uncert. 1 Sigma", fields, row)
 		c14_date_type = get_from_field("Date Type", fields, row)
-		row_data["C_14_Method"] = get_from_field("C-14 Analysis C-14 Method", fields, row)
-		c14_note_1 = get_from_field("C-14 Analysis Note 1", fields, row)
+		row_data["C_14_Method"] = get_from_field("C-14 Method", fields, row)
 		c14_delta13c = get_from_field("Delta C-13", fields, row)
-		c14_note_2 = get_from_field("C-14 Analysis Note 2", fields, row)
+		c14_note_analysis = get_from_field("C-14 Analysis Note", fields, row)
 		
 		row_data["Country"] = get_from_field("Country", fields, row)
 		row_data["District"] = get_from_field("District", fields, row)
@@ -162,7 +165,6 @@ def import_xlsx(cmodel, path, fields, progress):
 		site_name = get_from_field("Site Name", fields, row)
 		site_coordinates = get_from_field("Site Coordinates", fields, row)
 		site_note = get_from_field("Site Note", fields, row)
-		amcr_id = get_from_field("AMCR ID", fields, row)
 		
 		row_data["Activity_Area"] = get_from_field("Activity Area", fields, row)
 		
@@ -172,10 +174,8 @@ def import_xlsx(cmodel, path, fields, progress):
 		context_description = get_from_field("Context Description", fields, row)
 		depth_cm = get_from_field("Depth cm", fields, row)
 		
-		relative_dating_name_1 = get_from_field("Relative Dating Name1", fields, row)
-		relative_dating_note_1 = get_from_field("Relative Dating Note1", fields, row)
-		relative_dating_name_2 = get_from_field("Relative Dating Name2", fields, row)
-		relative_dating_note_2 = get_from_field("Relative Dating Note2", fields, row)
+		relative_dating_name_1 = get_from_field("Relative Dating Name 1", fields, row)
+		relative_dating_name_2 = get_from_field("Relative Dating Name 2", fields, row)
 		
 		row_data["Sample"] = get_from_field("Sample Number", fields, row)
 		sample_note = get_from_field("Sample Note", fields, row)
@@ -190,6 +190,9 @@ def import_xlsx(cmodel, path, fields, progress):
 		source_reference = get_from_field("Source Reference", fields, row)
 		source_uri = get_from_field("Source URI", fields, row)
 		source_acquisition = get_from_field("Source Acquisition", fields, row)
+		
+		submitter_name = get_from_field("Submitter Name", fields, row)
+		submitter_organization = get_from_field("Submitter Organization", fields, row)
 		
 		if c14_date_type != "conv. 14C BP":
 			continue
@@ -211,23 +214,18 @@ def import_xlsx(cmodel, path, fields, progress):
 				errors.append("Invalid Entry: Row %d, Delta C-13: %s" % (row_n, c14_delta13c))
 				continue
 		
-		c14_note_analysis = "; ".join([val for val in [c14_note_1, c14_note_2] if val])
-		
 		relative_datings_row = []
-		for name, note in [[relative_dating_name_1, relative_dating_note_1], [relative_dating_name_2, relative_dating_note_2]]:
+		for name in [relative_dating_name_1, relative_dating_name_2]:
 			if name:
-				relative_datings_general.add(name)
-				if note:
-					relative_datings_row.append("%s, %s" % (name, note))
-				else:
-					relative_datings_row.append(name)
+				relative_datings_row.append(name)
+				if "," in name:
+					relative_datings_general.add(name.split(",")[0].strip())
 		
 		row_data["Site"] = {
 			"Name": site_name,
 			"Location": site_coordinates,
 			"Note": site_note,
 		}
-		# TODO amcr_id
 		
 		if not context_name:
 			context_name = "unspecified"
@@ -256,6 +254,10 @@ def import_xlsx(cmodel, path, fields, progress):
 		row_data["Cadastre"] = {
 			"Name": cadastre,
 			"Code": cadastre_code,
+		}
+		row_data["Submitter"] = {
+			"Name": submitter_name,
+			"Organization": submitter_organization,
 		}
 		
 		row_idxs = {}
@@ -369,10 +371,12 @@ def import_xlsx(cmodel, path, fields, progress):
 		obj_country = obj_lookup["Country"][other_idxs["Country"]]
 		obj_district = obj_lookup["District"][other_idxs["District"]]
 		obj_cadastre = obj_lookup["Cadastre"][other_idxs["Cadastre"]]
+		obj_submitter = obj_lookup["Submitter"][other_idxs["Submitter"]]
 		
 		obj_c_14.add_relation(obj_reliability, "descr")
 		obj_c_14.add_relation(obj_method, "descr")
 		obj_c_14.add_relation(obj_sample, "analyses")
+		obj_c_14.add_relation(obj_submitter, "descr")
 		obj_sample.add_relation(obj_material, "descr")
 		obj_context.add_relation(obj_sample, "contains")
 		obj_context.add_relation(obj_feature, "descr")

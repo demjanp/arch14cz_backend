@@ -22,7 +22,10 @@ Backend graphical user interface for Arch14CZ - the database of archaeological r
 For the frontend interface see the [arch14cz_frontend](https://github.com/demjanp/arch14cz_frontend) project.
 
 ### Database Schema
-`TODO`
+The database is be based on the [Deposit](https://github.com/demjanp/deposit) graph model, comprised of Classes representing different types of data, Descriptors representing attributes of the particular records, Objects representing those unique records (data points) and Relations representing connections between these records.
+
+*Database schema: Classes (on grey background), their Descriptors (in frames) and Relations between them.*
+<img src="db_schema.png" width="640">
 
 ## Installation <a name="installation"></a>
 
@@ -32,13 +35,103 @@ For a Windows installer see:
 
 ## Usage <a name="usage"></a>
 ### Connecting to a Backend Database
-`TODO`
+To connect to a backend database, use the command `Backend` -> `Connect` and select a data source. The data source can be either a local file (Pickle and JSON formats) or a PostgreSQL database.
+
+You can create a new Pickle or JSON database by entering its path (e.g. `C:/data/data.pickle`) and clicking `Create`.
+
+You can create a new PostgreSQL database by entering the connection details (a blank database has to be already created on the server, for example using pgAdmin), choosing a new identifier and clicking `Create`.
+
+PostgreSQL Relational is a special format to preserve maximum compatibility of Deposit, which is a graph database, with relational databases. In this format relations are stored using join tables which can cause loading and saving to take longer.
 
 ### Data Entry
-`TODO`
+1. Before entering new data, ensure that the Arch14CZ schema is created in the current database via the command `Backend` -> `Create Schema`.
+2. Open the backend database using the command `Backend` -> `Open`.
+3. Click on `C14 Form` on the `User Tools` toolbar.
+4. Fill in the form and click `Submit`.
+
+<details>
+<summary>Example of a filled entry form</summary>
+<img src="entry_form.png">
+</details>
+
+All field groups except `Relative Dating` and `Source` have a drop-down list, with the possibility to look up if an entry is already present in the database and use the `Fill` button to fill it in. 
+
+### Ordering Relative Datings
+For the frontend database to function properly, all relative datings have to be ordered. This is done by creating `before` type relations between the relative dating entries, which indicate that one relative dating is earlier (before) another. Based on these relations, the Arch14CZ application can then calculate ordering of the dates which can be used to specify a relative dating range when querying the database. 
+1. Open the backend database using the command `Backend` -> `Open`.
+2. Open the `Relative Dating` Class by double-clicking its name in the left navigator pane.
+3. Click the `Graph` tab on the query window.
+4. Find an entry that is not yet linked to at least one other entry. All entries should have at least one link an earlier and one link to a later dating (as far as there is one).
+5. Find the closest dating which is later than the selected one and create a `before` type relation to it as shown in the animation:
+6. In a similar way, create a `before` relation between the closest earlier entry and the selected entry.
+7. Repeat until all entries are connected in a chronological sequence.
+<img src="dating_relation.gif">
 
 ### Importing Excel Data
-`TODO`
+Data can be imported from an Excel (.xlsx) file via the menu `Backend` -> `Import Excel Data`. For an example, see [import_sample.xlsx](import_sample.xlsx). 
+
+The file has to contain the following columns:
+<pre><code>
+Lab Code
+C-14 Activity BP:
+    C-14 measurement in radiocarbon (uncalibrated) years BP
+C-14 Uncertainty 1 Sigma:
+    1-sigma uncertainty of the measurement
+Date Type:
+    Type of the C-14 data (usually 'conv. 14C BP')
+C-14 Method:
+    AMS or conventional
+Delta C-13:
+    Delta C-13 measurement
+C-14 Analysis Note
+Country
+Cadastre
+Cadastre Code:
+    Code of the cadastre (see https://www.czso.cz/csu/rso/katastralni_uzemi_rso).
+District
+Site Name
+Site Coordinates:
+    WGS 84 standard, format XX.XXXXXXXN, XX.XXXXXXXE
+Site Note
+Activity Area:
+    Type of the archaeological activity area (e.g., settlement, cemetery).
+Feature:
+    Type of the archaeological feature (e.g. storage pit, grave).
+Context Name:
+    Identifier of the context within the site (e.g., Feature 123).
+Context Description
+Context Depth cm:
+    Depth at which the sample was retrieved.
+Relative Dating Name 1:
+    Relative dating of the context, as detailed as possible (e.g., Lengyel Culture, phase I).
+Relative Dating Name 2:
+    Additional relative dating.
+Sample Number:
+    Inventory number of the dated sample.
+Sample Note
+Material Name
+Material Note
+Reliability:
+    Reliability of the C-14 dating in respect to the archaeological context.
+    Possible values:
+        no problems declared
+        in contradiction with archaeological chronology/sequence
+        no archaeological finds associated
+        context disturbation
+        other problems
+        sample contamination
+Reliability Note
+Source Description:
+    Citation of the source.
+Source Reference:
+    Reference to page or figure.
+Source URI:
+    DOI or aleph link (where applicable).
+Source Acquisition:
+    Original source of the data (Arch14CZ, C14.sk or other database) 
+Submitter Name
+Submitter Organization
+</code></pre>
 
 ### Choosing a Radiocarbon Calibration Curve
 The software is supplied with the IntCal20 calibration curve by Reimer et al. [^1].
@@ -52,7 +145,12 @@ To load the calibration curve:
 [^1]: <small>Reimer, P., Austin, W., Bard, E., Bayliss, A., Blackwell, P., Bronk Ramsey, C., Butzin, M., Cheng, H., Edwards, R., Friedrich, M., Grootes, P., Guilderson, T., Hajdas, I., Heaton, T., Hogg, A., Hughen, K., Kromer, B., Manning, S., Muscheler, R., Palmer, J., Pearson, C., van der Plicht, J., Reimer, R., Richards, D., Scott, E., Southon, J., Turney, C., Wacker, L., Adolphi, F., Büntgen, U., Capano, M., Fahrni, S., Fogtmann-Schulz, A., Friedrich, R., Köhler, P., Kudsk, S., Miyake, F., Olsen, J., Reinig, F., Sakamoto, M., Sookdeo, A. and Talamo, S. (2020) The IntCal20 Northern Hemisphere radiocarbon age calibration curve (0–55 cal kBP). Radiocarbon, 62(4), pp.725-757. doi:10.1017/RDC.2020.41</small>
 
 ### Publishing Data
-`TODO`
+To publish data to the frontend database, follow these steps:
+1. Connect to the frontend database using the command `Frontend` -> `Connect`.
+2. Enter the connection details (a PosgreSQL database must already exist on the server).
+3. Publish the database using the command `Frontend` -> `Publish`. 
+
+This will automatically calculate the order of relative datings and 95% ranges of calibrated dates for each C-14 date. The data will be then uploaded to the frontend database.
 
 ## Developer Notes <a name="developer"></a>
 ### Preparing the Virtual Environment

@@ -24,14 +24,13 @@ def get_columns_xlsx(path):
 class DialogImportExcel(QtWidgets.QFrame):
 	
 	field_names = [
-		"C-14 Analysis Lab Code",
-		"C-14 Analysis C-14 Activity BP",
-		"C-14 Analysis C-14 Uncert. 1 Sigma",
+		"Lab Code",
+		"C-14 Activity BP",
+		"C-14 Uncert. 1 Sigma",
 		"Date Type",
-		"C-14 Analysis C-14 Method",
-		"C-14 Analysis Note 1",
+		"C-14 Method",
 		"Delta C-13",
-		"C-14 Analysis Note 2",
+		"C-14 Analysis Note",
 		"Country",
 		"Cadastre",
 		"Cadastre Code",
@@ -39,16 +38,13 @@ class DialogImportExcel(QtWidgets.QFrame):
 		"Site Name",
 		"Site Coordinates",
 		"Site Note",
-		"AMCR ID",
 		"Activity Area",
 		"Feature",
 		"Context Name",
 		"Context Description",
 		"Depth cm",
-		"Relative Dating Name1",
-		"Relative Dating Note1",
-		"Relative Dating Name2",
-		"Relative Dating Note2",
+		"Relative Dating Name 1",
+		"Relative Dating Name 2",
 		"Sample Number",
 		"Sample Note",
 		"Material Name",
@@ -59,6 +55,8 @@ class DialogImportExcel(QtWidgets.QFrame):
 		"Source Reference",
 		"Source URI",
 		"Source Acquisition",
+		"Submitter Name",
+		"Submitter Organization",
 	]
 	
 	def __init__(self, dialog, cview):

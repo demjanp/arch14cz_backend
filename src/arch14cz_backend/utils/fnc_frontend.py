@@ -477,7 +477,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	for district, country_code in dict_district:
 		if district:
 			code = "%s#%s" % (district, country_code)
-			label = "%s (%s)" % (district, country_code)
+			label = "%s" % (district)
 			cursor.execute("INSERT INTO %s VALUES (%%s, %%s);" % (table_district), (code, label))
 	
 	cnt += 1
@@ -487,7 +487,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	for cadastre, district, country_code in dict_cadastre:
 		if cadastre:
 			code = "%s#%s#%s" % (cadastre, district, country_code)
-			label = "%s (%s, %s)" % (cadastre, district, country_code)
+			label = "%s (%s)" % (cadastre, district)
 			cursor.execute("INSERT INTO %s VALUES (%%s, %%s);" % (table_cadastre), (code, label))
 	
 	cnt += 1
