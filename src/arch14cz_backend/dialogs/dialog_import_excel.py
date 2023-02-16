@@ -57,6 +57,7 @@ class DialogImportExcel(QtWidgets.QFrame):
 		"Source Acquisition",
 		"Submitter Name",
 		"Submitter Organization",
+		"Public",
 	]
 	
 	def __init__(self, dialog, cview):

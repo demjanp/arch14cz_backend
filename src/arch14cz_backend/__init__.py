@@ -1,7 +1,7 @@
-version_info = (0, 5, 0)
+version_info = (0, 5, 1)
 
 __version__ = '.'.join(map(str, version_info))
 __title__ = 'Arch14CZ'
-__date__ = "13.2.2023"
+__date__ = "16.2.2023"
 
 from arch14cz_backend.arch14cz_main import Arch14CZMain

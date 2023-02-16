@@ -138,6 +138,8 @@ The file has to contain the following columns:
     Original source of the data (Arch14CZ, C14.sk or other database) 
 32. Submitter Name
 33. Submitter Organization
+34. Public:
+	1 or 0, indicates whether the date can be published (if set to 0, the values of C-14 activity and uncertainty will be set to -1 when publishing to the frontend database)
 
 ### Choosing a Radiocarbon Calibration Curve <a name="curve"></a>
 The software is supplied with the IntCal20 calibration curve by Reimer et al. [^1].

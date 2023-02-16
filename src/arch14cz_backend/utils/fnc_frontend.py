@@ -517,6 +517,11 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		vC_14_CE_From = int(obj.get_descriptor("CE_From"))
 		vC_14_CE_To = int(obj.get_descriptor("CE_To"))
 		vC_14_Note = str_or_empty(obj.get_descriptor("Note_Analysis"))
+		is_public = obj.get_descriptor("Public")
+		if is_public is None:
+			is_public = 0
+		else:
+			is_public = int(is_public)
 		vReliability = lookup_Reliability[obj_id] if obj_id in lookup_Reliability else ""
 		vReliability_Note = str_or_empty(obj.get_descriptor("Note_Reliability"))
 		if obj_id in lookup_CountryDistrictCadastre:
@@ -552,6 +557,14 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 				)
 		vRelative_Dating_Name = "; ".join(vRelative_Dating_Name)
 		vRelative_Dating_Order = sorted(list(vRelative_Dating_Order))
+		
+		if not is_public:
+			vC_14_Activity = -1
+			vC_14_Uncertainty = -1
+			note = ["unpublished date"]
+			if vC_14_Note:
+				note.append(vC_14_Note)
+			vC_14_Note = "; ".join(note)
 		
 		cursor.execute("INSERT INTO %s VALUES (%s);" % (table_main, ", ".join(["%s"]*27)), (
 			vArch14CZ_ID,

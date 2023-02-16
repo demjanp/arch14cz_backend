@@ -194,6 +194,8 @@ def import_xlsx(cmodel, path, fields, progress):
 		submitter_name = get_from_field("Submitter Name", fields, row)
 		submitter_organization = get_from_field("Submitter Organization", fields, row)
 		
+		c14_public = get_from_field("Public", fields, row)
+		
 		if c14_date_type != "conv. 14C BP":
 			continue
 		
@@ -213,6 +215,11 @@ def import_xlsx(cmodel, path, fields, progress):
 			except:
 				errors.append("Invalid Entry: Row %d, Delta C-13: %s" % (row_n, c14_delta13c))
 				continue
+		if c14_public:
+			try:
+				c14_public = int(c14_public)
+			except:
+				c14_public = 0
 		
 		relative_datings_row = []
 		for name in [relative_dating_name_1, relative_dating_name_2]:
@@ -305,6 +312,7 @@ def import_xlsx(cmodel, path, fields, progress):
 			"Note_Material": material_note,
 			"Note_Sample": sample_note,
 			"Note_Reliability": reliability_note,
+			"Public": c14_public,
 		}
 		c14_data.append([deepcopy(c_14_analysis), deepcopy(row_idxs), deepcopy(relative_dating_idxs), deepcopy(source_idxs)])
 	
