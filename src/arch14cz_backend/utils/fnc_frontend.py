@@ -77,6 +77,12 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			return ""
 		return str(value)
 	
+	def as_hyperlink(value):
+		
+		if not value:
+			return ""
+		return '''<a href="%s">%s</a>''' % (value, value)
+	
 	errors = []
 	n_published = 0
 	n_rows = 0
@@ -404,7 +410,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	for row in range(len(query)):
 		lookup_Source[query[row, "C_14_Analysis", "Arch14CZ_ID"][0]].append({
 			"Description": str_or_empty(query[row, "Source", "Description"][1]),
-			"URI": str_or_empty(query[row, "Source", "URI"][1]),
+			"URI": as_hyperlink(str_or_empty(query[row, "Source", "URI"][1])),
 			"Reference": str_or_empty(query[row, "Source", "Reference"][1]),
 		})
 	cnt += 1
@@ -495,6 +501,8 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	if progress.cancel_pressed():
 		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	for name, order_min, order_max in dict_relative_dating:
+		if "," in name:
+			continue
 		code = "%d#%d" % (order_min, order_max)
 		cursor.execute("INSERT INTO %s VALUES (%%s, %%s);" % (table_relative_dating), (code, name))
 	
@@ -522,6 +530,8 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			is_public = 0
 		else:
 			is_public = int(is_public)
+		if not is_public:
+			continue
 		vReliability = lookup_Reliability[obj_id] if obj_id in lookup_Reliability else ""
 		vReliability_Note = str_or_empty(obj.get_descriptor("Note_Reliability"))
 		if obj_id in lookup_CountryDistrictCadastre:
@@ -557,14 +567,6 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 				)
 		vRelative_Dating_Name = "; ".join(vRelative_Dating_Name)
 		vRelative_Dating_Order = sorted(list(vRelative_Dating_Order))
-		
-		if not is_public:
-			vC_14_Activity = -1
-			vC_14_Uncertainty = -1
-			note = ["unpublished date"]
-			if vC_14_Note:
-				note.append(vC_14_Note)
-			vC_14_Note = "; ".join(note)
 		
 		cursor.execute("INSERT INTO %s VALUES (%s);" % (table_main, ", ".join(["%s"]*27)), (
 			vArch14CZ_ID,

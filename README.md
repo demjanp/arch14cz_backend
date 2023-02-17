@@ -57,7 +57,7 @@ PostgreSQL Relational is a special format to preserve maximum compatibility of D
 1. Before entering new data, ensure that the Arch14CZ schema is created in the current database via the command `Backend` -> `Create Schema`.
 2. Open the backend database using the command `Backend` -> `Open`.
 3. Click on `C14 Form` on the `User Tools` toolbar.
-4. Fill in the form and click `Submit`.
+4. Fill in the form (see the [Import](#import) section for details on different fields) and click `Submit`.
 
 *Example of a filled entry form.*
 <img src="entry_form.png">
@@ -84,8 +84,6 @@ The file has to contain the following columns:
     C-14 measurement in radiocarbon (uncalibrated) years BP
 3. C-14 Uncertainty 1 Sigma:
     1-sigma uncertainty of the measurement
-4. Date Type:
-    Type of the C-14 data (usually 'conv. 14C BP')
 5. C-14 Method:
     AMS or conventional
 6. Delta C-13:
@@ -101,9 +99,9 @@ The file has to contain the following columns:
     WGS 84 standard, format XX.XXXXXXXN, XX.XXXXXXXE
 14. Site Note
 15. Activity Area:
-    Type of the archaeological activity area (e.g., settlement, cemetery).
+    Type of the archaeological activity area, in a comma-separated format, going from more general to more specific, e.g., 'burial, cemetery' or 'settlement, enclosed'.
 16. Feature:
-    Type of the archaeological feature (e.g. storage pit, grave).
+    Type of the archaeological feature, in a comma-separated format, going from more general to more specific, e.g., 'burial, cremation' or 'pit, storage'.
 17. Context Name:
     Identifier of the context within the site (e.g., Feature 123).
 18. Context Description
@@ -117,6 +115,7 @@ The file has to contain the following columns:
     Inventory number of the dated sample.
 23. Sample Note
 24. Material Name
+	In a comma-separated format, going from more general to more specific, e.g., 'bone, animal' or 'macroremain, grain, charred'.
 25. Material Note
 26. Reliability:
     Reliability of the C-14 dating in respect to the archaeological context. Possible values:
