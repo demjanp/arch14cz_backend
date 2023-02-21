@@ -46,6 +46,10 @@ class View(DView):
 		
 		self.backend.set_folder(path, url)
 	
+	def set_frontend_host(self, name):
+		
+		self.frontend.set_host(name)
+	
 	def set_frontend_name(self, name):
 		
 		self.frontend.set_db_name(name)

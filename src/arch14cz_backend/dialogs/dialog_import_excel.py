@@ -46,7 +46,6 @@ class DialogImportExcel(QtWidgets.QFrame):
 		"Relative Dating Name 2",
 		"Sample Number",
 		"Sample Note",
-		"Material Type",
 		"Material Name",
 		"Material Note",
 		"Reliability",

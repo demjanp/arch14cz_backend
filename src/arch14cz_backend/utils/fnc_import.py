@@ -1,6 +1,8 @@
 from deposit.utils.fnc_serialize import (load_user_tool)
 import arch14cz_backend
 
+from arch14cz_backend.utils.fnc_phasing import (update_datings)
+
 from openpyxl import load_workbook
 from copy import deepcopy
 import os
@@ -178,9 +180,7 @@ def import_xlsx(cmodel, path, fields, progress):
 		row_data["Sample"] = get_from_field("Sample Number", fields, row)
 		sample_note = get_from_field("Sample Note", fields, row)
 		
-		material_type = get_from_field("Material Type", fields, row)
-		material_name = get_from_field("Material Name", fields, row)
-		row_data["Material"] = "%s, %s" % (material_type, material_name)
+		row_data["Material"] = get_from_field("Material Name", fields, row)
 		material_note = get_from_field("Material Note", fields, row)
 		
 		row_data["Reliability"] = get_from_field("Reliability", fields, row)
@@ -222,10 +222,6 @@ def import_xlsx(cmodel, path, fields, progress):
 		for name in [relative_dating_name_1, relative_dating_name_2]:
 			if name:
 				relative_datings_row.append(name)
-				if "," in name:
-					name = name.split(",")[0].strip()
-					if name not in relative_datings_row:
-						relative_datings_row.append(name)
 		
 		row_data["Site"] = {
 			"Name": site_name,
@@ -394,6 +390,8 @@ def import_xlsx(cmodel, path, fields, progress):
 		
 		for idx in source_idxs:
 			obj_lookup["Source"][idx].add_relation(obj_c_14, "describes")
+	
+	update_datings(cmodel)
 	
 	progress.stop()
 	cmodel._model.blockSignals(False)

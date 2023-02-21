@@ -2,7 +2,7 @@ from deposit.utils.fnc_serialize import (try_numeric)
 from arch14cz_backend.utils.fnc_radiocarbon import (
 	load_calibration_curve, calibrate, calc_range
 )
-from arch14cz_backend.utils.fnc_phasing import (get_phasing)
+from arch14cz_backend.utils.fnc_phasing import (update_datings, get_phasing)
 
 from collections import defaultdict
 from datetime import datetime
@@ -77,12 +77,6 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			return ""
 		return str(value)
 	
-	def as_hyperlink(value):
-		
-		if not value:
-			return ""
-		return '''<a href="%s">%s</a>''' % (value, value)
-	
 	errors = []
 	n_published = 0
 	n_rows = 0
@@ -94,6 +88,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		return n_published, n_rows, ["Calibration Curve file not found"]
 	
 	progress.update_state(text = "Calculating order for relative dates")
+	update_datings(cmodel)
 	phasing, names, circulars = get_phasing(cmodel)
 	# phasing = {obj_id: [phase_min, phase_max], ...}
 	#	phase_min/max = None if no chronological relations found
@@ -152,7 +147,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	progress.update_state(text = "Calibrating C-14 dates")
 	curve = load_calibration_curve(path_curve, interpolate = False)
 	cnt = 1
-	cmax = 3*n_rows + 30
+	cmax = 3*n_rows + 31
 	for obj in cls_c14.get_members(direct_only = True):
 		progress.update_state(value = cnt, maximum = cmax)
 		if progress.cancel_pressed():
@@ -173,6 +168,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		obj.set_descriptor("CE_To", ce_to)
 	
 	progress.update_state(text = "Creating tables", value = cnt, maximum = cmax)
+	table_meta = "c_14_metadata"
 	table_main = "c_14_main"
 	table_country = "c_14_dict_country"
 	table_district = "c_14_dict_district"
@@ -196,7 +192,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	)
 	tables = [row[0] for row in cursor.fetchall()]
 	table_names = set([
-		table_main, table_country, table_district, table_cadastre, 
+		table_meta, table_main, table_country, table_district, table_cadastre, 
 		table_activity_area, table_feature, table_material, table_relative_dating,
 	])
 	for name in table_names:
@@ -220,6 +216,11 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		if progress.cancel_pressed():
 			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		time.sleep(0.5)
+	if table_meta not in tables:
+		cursor.execute('''CREATE TABLE %s (
+			"Variable" TEXT,
+			"Value" TEXT
+		);''' % (table_meta))
 	
 	if table_main not in tables:
 		cursor.execute('''CREATE TABLE %s (
@@ -410,7 +411,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	for row in range(len(query)):
 		lookup_Source[query[row, "C_14_Analysis", "Arch14CZ_ID"][0]].append({
 			"Description": str_or_empty(query[row, "Source", "Description"][1]),
-			"URI": as_hyperlink(str_or_empty(query[row, "Source", "URI"][1])),
+			"URI": str_or_empty(query[row, "Source", "URI"][1]),
 			"Reference": str_or_empty(query[row, "Source", "Reference"][1]),
 		})
 	cnt += 1
@@ -482,9 +483,12 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	for district, country_code in dict_district:
 		if district:
-			code = "%s#%s" % (district, country_code)
+			code = "%s#%s" % (country_code, district)
 			label = "%s" % (district)
-			cursor.execute("INSERT INTO %s VALUES (%%s, %%s);" % (table_district), (code, label))
+			cursor.execute(
+				"INSERT INTO %s VALUES (%%s, %%s);" % (table_district), 
+				(code, label)
+			)
 	
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
@@ -492,9 +496,12 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	for cadastre, district, country_code in dict_cadastre:
 		if cadastre:
-			code = "%s#%s#%s" % (cadastre, district, country_code)
+			code = "%s#%s#%s" % (country_code, district, cadastre)
 			label = "%s (%s)" % (cadastre, district)
-			cursor.execute("INSERT INTO %s VALUES (%%s, %%s);" % (table_cadastre), (code, label))
+			cursor.execute(
+				"INSERT INTO %s VALUES (%%s, %%s);" % (table_cadastre), 
+				(code, label)
+			)
 	
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
@@ -504,7 +511,10 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		if "," in name:
 			continue
 		code = "%d#%d" % (order_min, order_max)
-		cursor.execute("INSERT INTO %s VALUES (%%s, %%s);" % (table_relative_dating), (code, name))
+		cursor.execute(
+			"INSERT INTO %s VALUES (%%s, %%s);" % (table_relative_dating), 
+			(code, name)
+		)
 	
 	n_published = 0
 	for obj in cls_c14.get_members(direct_only = True):
@@ -555,7 +565,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			vSource.append(", ".join([value for value in [
 				row["Description"], row["URI"], row["Reference"]
 			] if value]))
-		vSource = "\n".join(vSource)
+		vSource = "\n".join(sorted(vSource, key = lambda row: len(row)))
 		vRelative_Dating_Name = []
 		vRelative_Dating_Order = set([])
 		for row in lookup_Relative_Dating[obj_id]:
@@ -568,36 +578,45 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		vRelative_Dating_Name = "; ".join(vRelative_Dating_Name)
 		vRelative_Dating_Order = sorted(list(vRelative_Dating_Order))
 		
-		cursor.execute("INSERT INTO %s VALUES (%s);" % (table_main, ", ".join(["%s"]*27)), (
-			vArch14CZ_ID,
-			vC_14_Lab_Code,
-			vC_14_Activity,
-			vC_14_Uncertainty,
-			vC_14_CE_From,
-			vC_14_CE_To,
-			vC_14_Note,
-			vReliability,
-			vReliability_Note,
-			vCountry,
-			vCountryCode,
-			vDistrict,
-			vCadastre,
-			vSite,
-			vCoordinates,
-			vContext_Name,
-			vContext_Description,
-			vContext_Depth,
-			vActivity_Area,
-			vFeature,
-			vRelative_Dating_Name,
-			vRelative_Dating_Order,
-			vSample_Number,
-			vSample_Note,
-			vMaterial,
-			vMaterial_Note,
-			vSource,
-		))
+		cursor.execute(
+			"INSERT INTO %s VALUES (%s);" % (table_main, ", ".join(["%s"]*27)), 
+			(
+				vArch14CZ_ID,
+				vC_14_Lab_Code,
+				vC_14_Activity,
+				vC_14_Uncertainty,
+				vC_14_CE_From,
+				vC_14_CE_To,
+				vC_14_Note,
+				vReliability,
+				vReliability_Note,
+				vCountry,
+				vCountryCode,
+				vDistrict,
+				vCadastre,
+				vSite,
+				vCoordinates,
+				vContext_Name,
+				vContext_Description,
+				vContext_Depth,
+				vActivity_Area,
+				vFeature,
+				vRelative_Dating_Name,
+				vRelative_Dating_Order,
+				vSample_Number,
+				vSample_Note,
+				vMaterial,
+				vMaterial_Note,
+				vSource,
+			)
+		)
 		n_published += 1
+	
+	datestr = datetime.now().strftime("%d-%m-%Y")
+	cursor.execute(
+		"INSERT INTO %s VALUES (%%s, %%s);" % (table_meta), 
+		("date_updated", datestr)
+	)
 	
 	conn.commit()
 	conn.close()

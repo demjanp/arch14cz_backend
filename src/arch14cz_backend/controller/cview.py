@@ -149,6 +149,10 @@ class CView(AbstractSubcontroller):
 		
 		self._view.set_folder(path, url)
 	
+	def set_frontend_host(self, name):
+		
+		self._view.set_frontend_host(name)
+	
 	def set_frontend_name(self, name):
 		
 		self._view.set_frontend_name(name)

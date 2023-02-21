@@ -99,9 +99,9 @@ The file has to contain the following columns:
     WGS 84 standard, format XX.XXXXXXXN, XX.XXXXXXXE
 14. Site Note
 15. Activity Area:
-    Type of the archaeological activity area, in a comma-separated format, going from more general to more specific, e.g., 'burial, cemetery' or 'settlement, enclosed'.
+    Type of the archaeological activity area.
 16. Feature:
-    Type of the archaeological feature, in a comma-separated format, going from more general to more specific, e.g., 'burial, cremation' or 'pit, storage'.
+    Type of the archaeological feature.
 17. Context Name:
     Identifier of the context within the site (e.g., Feature 123).
 18. Context Description
@@ -115,8 +115,9 @@ The file has to contain the following columns:
     Inventory number of the dated sample.
 23. Sample Note
 24. Material Name
-	In a comma-separated format, going from more general to more specific, e.g., 'bone, animal' or 'macroremain, grain, charred'.
+	General type of the material of the sample (e.g., animal bone, charcoal)
 25. Material Note
+	Detailed description of the material (e.g. sus scrofa, triticum monococcum)
 26. Reliability:
     Reliability of the C-14 dating in respect to the archaeological context. Possible values:
     <pre>no problems declared

@@ -56,6 +56,12 @@ class CModel(DCModel):
 		
 		return self._frontend_valid
 	
+	def get_frontend_host(self):
+		
+		if not self.has_frontend():
+			return ""
+		return self._frontend_connection.get("host", "")
+	
 	def get_frontend_name(self):
 		
 		if not self.has_frontend():
@@ -174,9 +180,12 @@ class CModel(DCModel):
 			path = "temporary"
 		self.cmain.cview.set_folder(path, url)
 		
+		host = self.get_frontend_host()
 		name = self.get_frontend_name()
 		if not name:
+			host = "not connected"
 			name = "not connected"
+		self.cmain.cview.set_frontend_host(host)
 		self.cmain.cview.set_frontend_name(name)
 		self.cmain.cview.set_publish_enabled(self.has_frontend())
 		

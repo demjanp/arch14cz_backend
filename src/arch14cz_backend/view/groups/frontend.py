@@ -13,6 +13,7 @@ class Frontend(QtWidgets.QGroupBox):
 		self.setStyleSheet("QGroupBox {font-weight: bold;}")
 		self.setLayout(QtWidgets.QVBoxLayout())
 		
+		self._host_label = QtWidgets.QLabel("Host: ")
 		self._dbname_label = QtWidgets.QLabel("Database: ")
 		
 		self.button_connect = QtWidgets.QPushButton(
@@ -32,6 +33,7 @@ class Frontend(QtWidgets.QGroupBox):
 		button_box.layout().addWidget(self.button_update)
 		button_box.layout().addStretch()
 		
+		self.layout().addWidget(self._host_label)
 		self.layout().addWidget(self._dbname_label)
 		self.layout().addWidget(button_box)
 	
@@ -44,6 +46,10 @@ class Frontend(QtWidgets.QGroupBox):
 	def on_update(self):
 		
 		self.signal_update_clicked.emit()
+	
+	def set_host(self, name):
+		
+		self._host_label.setText("Host: <b>%s</b>" % (name))
 	
 	def set_db_name(self, name):
 		
