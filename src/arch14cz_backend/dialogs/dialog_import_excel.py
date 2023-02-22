@@ -37,6 +37,7 @@ class DialogImportExcel(QtWidgets.QFrame):
 		"Site Name",
 		"Site Coordinates",
 		"Site Note",
+		"AMCR ID",
 		"Activity Area",
 		"Feature",
 		"Context Name",

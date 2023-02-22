@@ -11,6 +11,7 @@
 <Group style="QGroupBox {font-weight: bold;}">Site
 	<LineEdit Site.Name style="">Name</>
 	<LineEdit Site.Location style="">Coordinates</>
+	<LineEdit Site.AMCR_ID style="">AMCR ID</>
 	<PlainTextEdit Site.Note style="">Note</>
 </>
 <Group style="QGroupBox {font-weight: bold;}">Context

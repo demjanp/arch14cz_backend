@@ -42,7 +42,7 @@ def create_schema(cmodel):
 	]
 	
 	other_descriptors = {
-		"Site":				["Name", "Location", "Note"],
+		"Site":				["Name", "Location", "Note", "AMCR_ID"],
 		"Context":			["Name", "Description", "Depth"],
 		"Source":			["Description", "Reference", "URI"],
 		"Activity_Area":	["Name"],
@@ -116,7 +116,7 @@ def import_xlsx(cmodel, path, fields, progress):
 	c14_data = []
 	
 	other_data = {
-		"Site": [],				# [{Name, Location, Note}, ...]
+		"Site": [],				# [{Name, Location, Note, AMCR_ID}, ...]
 		"Context": [],			# [{Name, Description, Depth}, ...]
 		"Activity_Area": [],	# [{Name}, ...]
 		"Feature": [],			# [{Name}, ...]
@@ -165,6 +165,7 @@ def import_xlsx(cmodel, path, fields, progress):
 		site_name = get_from_field("Site Name", fields, row)
 		site_coordinates = get_from_field("Site Coordinates", fields, row)
 		site_note = get_from_field("Site Note", fields, row)
+		site_amcr_id = get_from_field("AMCR ID", fields, row)
 		
 		row_data["Activity_Area"] = get_from_field("Activity Area", fields, row)
 		
@@ -227,6 +228,7 @@ def import_xlsx(cmodel, path, fields, progress):
 			"Name": site_name,
 			"Location": site_coordinates,
 			"Note": site_note,
+			"AMCR_ID": site_amcr_id,
 		}
 		
 		if not context_name:

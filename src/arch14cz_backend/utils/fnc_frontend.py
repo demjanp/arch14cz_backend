@@ -239,6 +239,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			"Cadastre" TEXT,
 			"Site" TEXT,
 			"Coordinates" TEXT,
+			"AMCR_ID" TEXT,
 			"Context_Name" TEXT,
 			"Context_Description" TEXT,
 			"Context_Depth" TEXT,
@@ -313,7 +314,8 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	query = cmodel.get_query(
 		"SELECT C_14_Analysis.Arch14CZ_ID, Sample.Number, \
 			Context.Name, Context.Description, Context.Depth, \
-			Site.Name, Site.Location, Cadastre.Name, District.Name, Country.Name",
+			Site.Name, Site.Location, Site.AMCR_ID, \
+			Cadastre.Name, District.Name, Country.Name",
 		silent = True
 	)
 	for row in range(len(query)):
@@ -331,7 +333,8 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		}
 		lookup_Site[obj_id] = {
 			"Name": str_or_empty(query[row, "Site", "Name"][1]),
-			"Location": str_or_empty(query[row, "Site", "Location"][1])
+			"Location": str_or_empty(query[row, "Site", "Location"][1]),
+			"AMCR_ID": str_or_empty(query[row, "Site", "AMCR_ID"][1]),
 		}
 		lookup_CountryDistrictCadastre[obj_id] = {
 			"Country": str_or_empty(query[row, "Country", "Name"][1]),
@@ -551,6 +554,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			vCadastre = lookup_CountryDistrictCadastre[obj_id]["Cadastre"]
 		vSite = lookup_Site[obj_id]["Name"] if obj_id in lookup_Site else ""
 		vCoordinates = lookup_Site[obj_id]["Location"] if obj_id in lookup_Site else ""
+		vAMCR_ID = lookup_Site[obj_id]["AMCR_ID"] if obj_id in lookup_Site else ""
 		vContext_Name = lookup_Context[obj_id]["Name"] if obj_id in lookup_Context else ""
 		vContext_Description = lookup_Context[obj_id]["Description"] if obj_id in lookup_Context else ""
 		vContext_Depth = lookup_Context[obj_id]["Depth"] if obj_id in lookup_Context else ""
@@ -579,7 +583,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		vRelative_Dating_Order = sorted(list(vRelative_Dating_Order))
 		
 		cursor.execute(
-			"INSERT INTO %s VALUES (%s);" % (table_main, ", ".join(["%s"]*27)), 
+			"INSERT INTO %s VALUES (%s);" % (table_main, ", ".join(["%s"]*28)), 
 			(
 				vArch14CZ_ID,
 				vC_14_Lab_Code,
@@ -596,6 +600,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 				vCadastre,
 				vSite,
 				vCoordinates,
+				vAMCR_ID,
 				vContext_Name,
 				vContext_Description,
 				vContext_Depth,
