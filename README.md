@@ -14,6 +14,7 @@ Created on 14. 12. 2021
    4. [Importing Excel Data](#import)
    5. [Choosing a Radiocarbon Calibration Curve](#curve)
    6. [Publishing Data](#publishing)
+   7. [Restoring from Backup](#restoring)
 4. [Developer Notes](#developer)
    1. [Preparing the Virtual Environment](#venv)
    2. [Cloning the GitHub Project](#cloning)
@@ -52,6 +53,8 @@ You can create a new Pickle or JSON database by entering its path (e.g. `C:/data
 You can create a new PostgreSQL database by entering the connection details (a blank database has to be already created on the server, for example using pgAdmin), choosing a new identifier and clicking `Create`.
 
 PostgreSQL Relational is a special format to preserve maximum compatibility of Deposit, which is a graph database, with relational databases. In this format relations are stored using join tables which can cause loading and saving to take longer.
+
+>Note that when using a PostgreSQL backend, you need to specify a local folder. In this folder a backup will be stored each time you save the database if the option `Backend` -> `Backup after every save` is enabled.
 
 ### Data Entry <a name="data_entry"></a>
 1. Before entering new data, ensure that the Arch14CZ schema is created in the current database via the command `Backend` -> `Create Schema`.
@@ -159,6 +162,13 @@ To publish data to the frontend database, follow these steps:
 3. Publish the database using the command `Frontend` -> `Publish`. 
 
 This will automatically calculate the order of relative datings and 95% ranges of calibrated dates for each C-14 date. The data will be then uploaded to the frontend database.
+
+### Restoring from Backup <a name="restoring"></a>
+If the option `Backend` -> `Backup after every save` is enabled, a backup copy of the database is stored before each save. You can return to a previous version of the database simply by loading one of the backups in the Arch14CZ - backend application.
+
+Backups can be found in the subdirectory `_backup` of the local folder, which can be accessed by clicking the link next to `Local Folder` on the main interface.
+
+To save a database restored from a file format in PostgreSQL format, open the Deposit inteface via the menu `Backend` -> `Open` and save it via the menu `Data` -> `Save As PostgreSQL`.
 
 ## Developer Notes <a name="developer"></a>
 ### Preparing the Virtual Environment <a name="venv"></a>

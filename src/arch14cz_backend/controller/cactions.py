@@ -43,7 +43,7 @@ class CActions(DCActions):
 				("Save", "Save"),
 				("Deposit", "Open"),
 				None,
-				("AutoBackup", "Backup backend after every save"),
+				("AutoBackup", "Backup after every save"),
 				("CreateSchema", "Create Schema"),
 				("ImportExcel", "Import Excel Data"),
 			],
