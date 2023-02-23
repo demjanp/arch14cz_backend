@@ -6,6 +6,7 @@ from deposit.utils.fnc_serialize import (encrypt_password)
 
 from arch14cz_backend.utils.fnc_frontend import (check_connection, publish_data)
 from arch14cz_backend.utils.fnc_import import (create_schema, import_xlsx)
+from arch14cz_backend.utils.fnc_phasing import (update_datings)
 
 import arch14cz_backend
 
@@ -135,6 +136,10 @@ class CModel(DCModel):
 	def create_schema(self):
 		
 		create_schema(self)
+	
+	def update_datings(self):
+		
+		update_datings(self)
 	
 	def import_excel(self, path, fields):
 		# fields[name] = column index

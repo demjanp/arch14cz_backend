@@ -45,6 +45,7 @@ class CActions(DCActions):
 				None,
 				("AutoBackup", "Backup after every save"),
 				("CreateSchema", "Create Schema"),
+				("UpdateDatings", "Update Datings"),
 				("ImportExcel", "Import Excel Data"),
 			],
 			"Frontend": [
@@ -196,6 +197,23 @@ class CActions(DCActions):
 			"Create the Arch14CZ schema in the database?"
 		):
 			self.cmain.cmodel.create_schema()
+	
+	
+	def update_UpdateDatings(self):
+		
+		return dict(
+			help = "Add 'contains' relation between general and detailed datings",
+			checkable = False,
+			enabled = True,
+		)
+	
+	def on_UpdateDatings(self, state):
+		
+		if self.cmain.cview.show_question(
+			"Update Datings",
+			"Add 'contains' relation between general and detailed datings?"
+		):
+			self.cmain.cmodel.update_datings()
 	
 	
 	def update_CalCurve(self):

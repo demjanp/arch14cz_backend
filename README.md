@@ -68,7 +68,8 @@ PostgreSQL Relational is a special format to preserve maximum compatibility of D
 All field groups except `Relative Dating` and `Source` have a drop-down list, with the possibility to look up if an entry is already present in the database and use the `Fill` button to fill it in. 
 
 ### Ordering Relative Datings <a name="ordering"></a>
-For the frontend database to function properly, all relative datings have to be ordered. This is done by creating `before` type relations between the relative dating entries, which indicate that one relative dating is earlier (before) another. Based on these relations, the Arch14CZ application can then calculate ordering of the dates which can be used to specify a relative dating range when querying the database. 
+For the frontend database to function properly, relative datings have to be ordered. This is done by creating `before` type relations between the relative dating entries, which indicate that one relative dating is earlier (before) another. Based on these relations, the Arch14CZ application can then calculate ordering of the dates which can be used to specify a relative dating range when querying the database.
+
 1. Open the backend database using the command `Backend` -> `Open`.
 2. Open the `Relative Dating` Class by double-clicking its name in the left navigator pane.
 3. Click the `Graph` tab on the query window.
@@ -77,6 +78,10 @@ For the frontend database to function properly, all relative datings have to be 
 6. In a similar way, create a `before` relation between the closest earlier entry and the selected entry.
 7. Repeat until all entries are connected in a chronological sequence.
 <img src="dating_relation.gif">
+
+Detailed relative datings where e.g., a phase of a culture is specified, can also be linked to more general datings by a `contains` relation. For example the dating `Linear Pottery Culture` can contain the dating `Linear Pottery Culture, phase IIa`. A dating which only has a `contains` relation will be ordered in the same way as the dating by which it is contained.
+
+The command `Backend` -> `Update Datings` automatically links all general and detailed datings by a `contains` relation. For example `Linear Pottery Culture, phase IIa` would generate two linked datings `Linear Pottery Culture` -> `contains` -> `Linear Pottery Culture, phase IIa`.
 
 ### Importing Excel Data <a name="import"></a>
 Data can be imported from an Excel (.xlsx) file via the menu `Backend` -> `Import Excel Data`. For an example, see [import_sample.xlsx](import_sample.xlsx). 
