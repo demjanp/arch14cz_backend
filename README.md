@@ -46,7 +46,7 @@ The Arch14CZ backend interface is used to connect to the backend database, enter
 >Note that after adding an entry or entries with a new relative dating, appropriate chronological relations have to be added to it before it can be published to the frontend database.
 
 ### Connecting to a Backend Database <a name="connecting"></a>
-To connect to a backend database, use the command `Backend` -> `Connect` and select a data source. The data source can be either a local file (Pickle and JSON formats) or a PostgreSQL database.
+To connect to a backend database, use the command `Backend` &rarr; `Connect` and select a data source. The data source can be either a local file (Pickle and JSON formats) or a PostgreSQL database.
 
 You can create a new Pickle or JSON database by entering its path (e.g. `C:/data/data.pickle`) and clicking `Create`.
 
@@ -54,11 +54,11 @@ You can create a new PostgreSQL database by entering the connection details (a b
 
 PostgreSQL Relational is a special format to preserve maximum compatibility of Deposit, which is a graph database, with relational databases. In this format relations are stored using join tables which can cause loading and saving to take longer.
 
->Note that when using a PostgreSQL backend, you need to specify a local folder. In this folder a backup will be stored each time you save the database if the option `Backend` -> `Backup after every save` is enabled.
+>Note that when using a PostgreSQL backend, you need to specify a local folder. In this folder a backup will be stored each time you save the database if the option `Backend` &rarr; `Backup after every save` is enabled.
 
 ### Data Entry <a name="data_entry"></a>
-1. Before entering new data, ensure that the Arch14CZ schema is created in the current database via the command `Backend` -> `Create Schema`.
-2. Open the backend database using the command `Backend` -> `Open`.
+1. Before entering new data, ensure that the Arch14CZ schema is created in the current database via the command `Backend` &rarr; `Create Schema`.
+2. Open the backend database using the command `Backend` &rarr; `Open`.
 3. Click on `C14 Form` on the `User Tools` toolbar.
 4. Fill in the form (see the [Import](#import) section for details on different fields) and click `Submit`.
 
@@ -70,7 +70,7 @@ All field groups except `Relative Dating` and `Source` have a drop-down list, wi
 ### Ordering Relative Datings <a name="ordering"></a>
 For the frontend database to function properly, relative datings have to be ordered. This is done by creating `before` type relations between the relative dating entries, which indicate that one relative dating is earlier (before) another. Based on these relations, the Arch14CZ application can then calculate ordering of the dates which can be used to specify a relative dating range when querying the database.
 
-1. Open the backend database using the command `Backend` -> `Open`.
+1. Open the backend database using the command `Backend` &rarr; `Open`.
 2. Open the `Relative Dating` Class by double-clicking its name in the left navigator pane.
 3. Click the `Graph` tab on the query window.
 4. Find an entry that is not yet linked to at least one other entry. All entries should have at least one link an earlier and one link to a later dating (as far as there is one).
@@ -81,10 +81,10 @@ For the frontend database to function properly, relative datings have to be orde
 
 Detailed relative datings where e.g., a phase of a culture is specified, can also be linked to more general datings by a `contains` relation. For example the dating `Linear Pottery Culture` can contain the dating `Linear Pottery Culture, phase IIa`. A dating which only has a `contains` relation will be ordered in the same way as the dating by which it is contained.
 
-The command `Backend` -> `Update Datings` automatically links all general and detailed datings by a `contains` relation. For example `Linear Pottery Culture, phase IIa` would generate two linked datings `Linear Pottery Culture` -> `contains` -> `Linear Pottery Culture, phase IIa`.
+The command `Backend` &rarr; `Update Datings` automatically links all general and detailed datings by a `contains` relation. For example `Linear Pottery Culture, phase IIa` would generate two linked datings `Linear Pottery Culture` &rarr; `contains` &rarr; `Linear Pottery Culture, phase IIa`.
 
 ### Importing Excel Data <a name="import"></a>
-Data can be imported from an Excel (.xlsx) file via the menu `Backend` -> `Import Excel Data`. For an example, see [import_sample.xlsx](import_sample.xlsx). 
+Data can be imported from an Excel (.xlsx) file via the menu `Backend` &rarr; `Import Excel Data`. For an example, see [import_sample.xlsx](import_sample.xlsx). 
 
 The file has to contain the following columns:
 1. Lab Code
@@ -162,18 +162,18 @@ To load the calibration curve:
 
 ### Publishing Data <a name="publishing"></a>
 To publish data to the frontend database, follow these steps:
-1. Connect to the frontend database using the command `Frontend` -> `Connect`.
+1. Connect to the frontend database using the command `Frontend` &rarr; `Connect`.
 2. Enter the connection details (a PosgreSQL database must already exist on the server).
-3. Publish the database using the command `Frontend` -> `Publish`. 
+3. Publish the database using the command `Frontend` &rarr; `Publish`. 
 
 This will automatically calculate the order of relative datings and 95% ranges of calibrated dates for each C-14 date. The data will be then uploaded to the frontend database.
 
 ### Restoring from Backup <a name="restoring"></a>
-If the option `Backend` -> `Backup after every save` is enabled, a backup copy of the database is stored before each save. You can return to a previous version of the database simply by loading one of the backups in the Arch14CZ - backend application.
+If the option `Backend` &rarr; `Backup after every save` is enabled, a backup copy of the database is stored before each save. You can return to a previous version of the database simply by loading one of the backups in the Arch14CZ - backend application.
 
 Backups can be found in the subdirectory `_backup` of the local folder, which can be accessed by clicking the link next to `Local Folder` on the main interface.
 
-To save a database restored from a file format in PostgreSQL format, open the Deposit inteface via the menu `Backend` -> `Open` and save it via the menu `Data` -> `Save As PostgreSQL`.
+To save a database restored from a file format in PostgreSQL format, open the Deposit inteface via the menu `Backend` &rarr; `Open` and save it via the menu `Data` &rarr; `Save As PostgreSQL`.
 
 ## Developer Notes <a name="developer"></a>
 ### Preparing the Virtual Environment <a name="venv"></a>
