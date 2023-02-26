@@ -1,3 +1,5 @@
+from arch14cz_backend.utils.fnc_convert import (float_or_none)
+
 import numpy as np
 from scipy.interpolate import interp1d
 
@@ -95,3 +97,34 @@ def calc_mean_std(cal_age, distribution):
 	mean = (cal_age * dist).sum()
 	std = np.sqrt((((cal_age - mean)**2) * dist).sum())
 	return mean, std
+
+def update_ranges(cmodel, path_curve, progress = None, cnt = 1, cmax = None):
+	
+	curve = load_calibration_curve(path_curve, interpolate = False)
+	cls_c14 = cmodel.get_class("C_14_Analysis")
+	if cls_c14 is None:
+		return ["C_14_Analysis Class not found"], 0
+	objs = cls_c14.get_members(direct_only = True)
+	if cmax is None:
+		cmax = len(objs)
+	for obj in objs:
+		if (progress is not None) and (cmax is not None):
+			progress.update_state(value = cnt, maximum = cmax)
+			if progress.cancel_pressed():
+				return ["Cancelled by user"], cnt
+		cnt += 1
+		ce_from = obj.get_descriptor("CE_From")
+		ce_to = obj.get_descriptor("CE_To")
+		if (ce_from is not None) and (ce_to is not None):
+			continue
+		age = float_or_none(obj.get_descriptor("C_14_Activity_BP"))
+		uncert = float_or_none(obj.get_descriptor("C_14_Uncertainty_1Sig"))
+		if (age is None) or (uncert is None):
+			continue
+		dist = calibrate(age, uncert, curve[:,1], curve[:,2])
+		ce_to, ce_from = calc_range(curve[:,0], dist, 0.9545)
+		ce_from, ce_to = int(round(-(ce_from - 1950))), int(round(-(ce_to - 1950)))
+		obj.set_descriptor("CE_From", ce_from)
+		obj.set_descriptor("CE_To", ce_to)
+	
+	return [], cnt

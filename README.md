@@ -106,27 +106,29 @@ The file has to contain the following columns:
 13. Site Coordinates:
     WGS 84 standard, format XX.XXXXXXXN, XX.XXXXXXXE
 14. Site Note
-15. Activity Area:
+15. Site AMCR ID
+	Identifier of an archaeological event ('akce') in the [Archaeological Map of the Czech Republic](https://amcr-info.aiscr.cz/)
+16. Activity Area:
     Type of the archaeological activity area.
-16. Feature:
+17. Feature:
     Type of the archaeological feature.
-17. Context Name:
+18. Context Name:
     Identifier of the context within the site (e.g., Feature 123).
-18. Context Description
-19. Context Depth cm:
+19. Context Description
+20. Context Depth cm:
     Depth at which the sample was retrieved.
-20. Relative Dating Name 1:
+21. Relative Dating Name 1:
     Relative dating of the context, as detailed as possible (e.g., Lengyel Culture, phase I).
-21. Relative Dating Name 2:
+22. Relative Dating Name 2:
     Additional relative dating.
-22. Sample Number:
+23. Sample Number:
     Inventory number of the dated sample.
-23. Sample Note
-24. Material Name
+24. Sample Note
+25. Material Name
 	General type of the material of the sample (e.g., animal bone, charcoal)
-25. Material Note
+26. Material Note
 	Detailed description of the material (e.g. sus scrofa, triticum monococcum)
-26. Reliability:
+27. Reliability:
     Reliability of the C-14 dating in respect to the archaeological context. Possible values:
     <pre>no problems declared
     in contradiction with archaeological chronology/sequence
@@ -135,18 +137,18 @@ The file has to contain the following columns:
     other problems
     sample contamination
     </pre>
-27. Reliability Note
-28. Source Description:
+28. Reliability Note
+29. Source Description:
     Citation of the source.
-29. Source Reference:
+30. Source Reference:
     Reference to page or figure.
-30. Source URI:
+31. Source URI:
     DOI or aleph link (where applicable).
-31. Source Acquisition:
+32. Source Acquisition:
     Original source of the data (Arch14CZ, C14.sk or other database) 
-32. Submitter Name
-33. Submitter Organization
-34. Public:
+33. Submitter Name
+34. Submitter Organization
+35. Public:
 	1 or 0, indicates whether the date can be published (if set to 0, the values of C-14 activity and uncertainty will be set to -1 when publishing to the frontend database)
 
 ### Choosing a Radiocarbon Calibration Curve <a name="curve"></a>

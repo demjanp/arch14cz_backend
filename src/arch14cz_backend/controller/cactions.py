@@ -1,4 +1,5 @@
 from deposit_gui import DCActions
+from deposit.utils.fnc_files import (as_url)
 
 import os
 
@@ -41,12 +42,18 @@ class CActions(DCActions):
 			"Backend": [
 				("Connect", "Connect"),
 				("Save", "Save"),
+				("SaveAsFile", "Save As File"),
 				("Deposit", "Open"),
 				None,
 				("AutoBackup", "Backup after every save"),
+				None,
+				("ImportExcel", "Import Excel Data"),
+				None,
 				("CreateSchema", "Create Schema"),
 				("UpdateDatings", "Update Datings"),
-				("ImportExcel", "Import Excel Data"),
+				("CalcOrder", "Calculate Dating Order"),
+				("CalcRanges", "Calibrate C-14 Dates"),
+				("GenIDs", "Generate Arch14CZ IDs"),
 			],
 			"Frontend": [
 				("ConnectFrontend", "Connect"),
@@ -111,6 +118,25 @@ class CActions(DCActions):
 			self.cmain.cmodel.save()
 		else:
 			self.on_SaveAsFile(True)
+	
+	
+	def update_SaveAsFile(self):
+		
+		return dict(
+			help = "Save As File",
+			checkable = False,
+			enabled = True,
+		)
+	
+	def on_SaveAsFile(self, state):
+		
+		path, format = self.cmain.cview.get_save_path("Save Database As", "Pickle (*.pickle);;JSON (*.json)")
+		if not path:
+			return
+		self.cmain.cview.set_recent_dir(path)
+		self.cmain.cmodel.save(path = path)
+		url = as_url(path)
+	
 	
 	def update_Deposit(self):
 		
@@ -214,6 +240,45 @@ class CActions(DCActions):
 			"Add 'contains' relation between general and detailed datings?"
 		):
 			self.cmain.cmodel.update_datings()
+	
+	
+	def update_CalcOrder(self):
+		
+		return dict(
+			help = "Calculate Relative Dating Order",
+			checkable = False,
+			enabled = True,
+		)
+	
+	def on_CalcOrder(self, state):
+		
+		self.cmain.cmodel.calc_order()
+	
+	
+	def update_CalcRanges(self):
+		
+		return dict(
+			help = "Calibrate C-14 Dates",
+			checkable = False,
+			enabled = True,
+		)
+	
+	def on_CalcRanges(self, state):
+		
+		self.cmain.cmodel.calc_ranges()
+	
+	
+	def update_GenIDs(self):
+		
+		return dict(
+			help = "Generate Arch14CZ IDs",
+			checkable = False,
+			enabled = True,
+		)
+	
+	def on_GenIDs(self, state):
+		
+		self.cmain.cmodel.update_ids()
 	
 	
 	def update_CalCurve(self):

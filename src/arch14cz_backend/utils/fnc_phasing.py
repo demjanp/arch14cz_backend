@@ -35,7 +35,10 @@ def update_datings(cmodel):
 		name_general = to_general(name)
 		obj_lookup[name_general].add_relation(obj_lookup[name], "contains")
 
-def get_phasing(cmodel, dating_cls = "Relative_Dating", name_descr = "Name", before_rel = "before", same_as_rel = "same_as", contains_rel = "contains"):
+def get_phasing(cmodel, 
+		dating_cls = "Relative_Dating", name_descr = "Name", 
+		before_rel = "before", same_as_rel = "same_as", contains_rel = "contains"
+	):
 	# cmodel = Deposit GUI DCModel
 	# returns phasing, names, circulars
 	# 	phasing = {obj_id: [phase_min, phase_max], ...}; phase_min/max = None if no chronological relations found
@@ -184,4 +187,35 @@ def get_phasing(cmodel, dating_cls = "Relative_Dating", name_descr = "Name", bef
 					break
 	
 	return phasing, names, circulars
+
+
+
+def update_order(cmodel, progress = None):
+	
+	errors = []
+	
+	update_datings(cmodel)
+	phasing, names, circulars = get_phasing(cmodel)
+	# phasing = {obj_id: [phase_min, phase_max], ...}
+	#	phase_min/max = None if no chronological relations found
+	# names = {obj_id: name, ...}
+	# circulars = [obj_id, ...]
+	
+	if circulars:
+		errors = ["Circular relations found between the following datings:"]
+		for obj_id in circulars:
+			errors.append("\t%s" % (names[obj_id]))
+		return errors
+	
+	cls = cmodel.get_class("Relative_Dating")
+	if cls is None:
+		return ["Relative_Dating Class not found"]
+	for obj in cls.get_members(direct_only = True):
+		if (progress is not None) and progress.cancel_pressed():
+			return ["Cancelled by user"]
+		phase_min, phase_max = phasing[obj.id]
+		obj.set_descriptor("Order_Min", phase_min)
+		obj.set_descriptor("Order_Max", phase_max)
+	
+	return errors
 

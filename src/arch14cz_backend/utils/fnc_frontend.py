@@ -1,8 +1,10 @@
 from deposit.utils.fnc_serialize import (try_numeric)
-from arch14cz_backend.utils.fnc_radiocarbon import (
-	load_calibration_curve, calibrate, calc_range
+from arch14cz_backend.utils.fnc_import import (generate_ids)
+from arch14cz_backend.utils.fnc_radiocarbon import (update_ranges)
+from arch14cz_backend.utils.fnc_phasing import (update_order)
+from arch14cz_backend.utils.fnc_convert import (
+	float_or_none, int_or_none, str_or_empty
 )
-from arch14cz_backend.utils.fnc_phasing import (update_datings, get_phasing)
 
 from collections import defaultdict
 from datetime import datetime
@@ -64,18 +66,11 @@ def check_connection(
 
 def publish_data(cmodel, frontend_connection, path_curve, progress):
 	
-	def float_or_none(value):
+	def cancel_progress(n_published, n_rows, errors):
 		
-		value = try_numeric(value)
-		if not (isinstance(value, int) or isinstance(value, float)):
-			return None
-		return float(value)
-	
-	def str_or_empty(value):
-		
-		if value is None:
-			return ""
-		return str(value)
+		cmodel._model.blockSignals(False)
+		cmodel.on_changed([],[])
+		return n_published, n_rows, errors
 	
 	errors = []
 	n_published = 0
@@ -87,85 +82,24 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	if not os.path.isfile(path_curve):
 		return n_published, n_rows, ["Calibration Curve file not found"]
 	
-	progress.update_state(text = "Calculating order for relative dates")
-	update_datings(cmodel)
-	phasing, names, circulars = get_phasing(cmodel)
-	# phasing = {obj_id: [phase_min, phase_max], ...}
-	#	phase_min/max = None if no chronological relations found
-	# names = {obj_id: name, ...}
-	# circulars = [obj_id, ...]
-	
-	def cancel_progress(n_published, n_rows, errors):
-		
-		cmodel._model.blockSignals(False)
-		cmodel.on_changed([],[])
-		return n_published, n_rows, errors
-	
 	cmodel._model.blockSignals(True)
 	
-	if circulars:
-		errors = ["Circular relations found between the following datings:"]
-		for obj_id in circulars:
-			errors.append("\t%s" % (names[obj_id]))
+	progress.update_state(text = "Calculating order for relative dates")
+	errors = update_order(cmodel, progress)
+	if errors:
 		return cancel_progress(n_published, n_rows, errors)
 	
-	cls = cmodel.get_class("Relative_Dating")
-	if cls is None:
-		return cancel_progress(n_published, n_rows, ["Relative_Dating Class not found"])
-	for obj in cls.get_members(direct_only = True):
-		if progress.cancel_pressed():
-			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
-		phase_min, phase_max = phasing[obj.id]
-		obj.set_descriptor("Order_Min", phase_min)
-		obj.set_descriptor("Order_Max", phase_max)
+	progress.update_state(text = "Generating Arch14CZ ID for each record")
+	n_rows, errors = generate_ids(cmodel)
+	if errors:
+		return cancel_progress(n_published, n_rows, errors)
 	
-	progress.update_state(text = "Generating Arch14CZ_ID for each record")
-	arch_ids = set([])
-	cls_c14 = cmodel.get_class("C_14_Analysis")
-	if cls_c14 is None:
-		return cancel_progress(n_published, n_rows, ["C_14_Analysis Class not found"])
-	for obj in cls_c14.get_members(direct_only = True):
-		n_rows += 1
-		arch_id = obj.get_descriptor("Arch14CZ_ID")
-		if arch_id is not None:
-			arch_ids.add(arch_id)
-	datestr = datetime.now().strftime("%d-%m-%Y")
-	for obj in cls_c14.get_members(direct_only = True):
-		if progress.cancel_pressed():
-			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
-		arch_id = obj.get_descriptor("Arch14CZ_ID")
-		if arch_id is None:
-			n = 0
-			while True:
-				arch_id = "A14CZ_%s_%d" % (datestr, n)
-				if arch_id not in arch_ids:
-					break
-				n += 1
-			obj.set_descriptor("Arch14CZ_ID", arch_id)
-			arch_ids.add(arch_id)
+	cmax = 3*n_rows + 31
 	
 	progress.update_state(text = "Calibrating C-14 dates")
-	curve = load_calibration_curve(path_curve, interpolate = False)
-	cnt = 1
-	cmax = 3*n_rows + 31
-	for obj in cls_c14.get_members(direct_only = True):
-		progress.update_state(value = cnt, maximum = cmax)
-		if progress.cancel_pressed():
-			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
-		cnt += 1
-		ce_from = obj.get_descriptor("CE_From")
-		ce_to = obj.get_descriptor("CE_To")
-		if (ce_from is not None) and (ce_to is not None):
-			continue
-		age = float_or_none(obj.get_descriptor("C_14_Activity_BP"))
-		uncert = float_or_none(obj.get_descriptor("C_14_Uncertainty_1Sig"))
-		if (age is None) or (uncert is None):
-			continue
-		dist = calibrate(age, uncert, curve[:,1], curve[:,2])
-		ce_to, ce_from = calc_range(curve[:,0], dist, 0.9545)
-		ce_from, ce_to = int(round(-(ce_from - 1950))), int(round(-(ce_to - 1950)))
-		obj.set_descriptor("CE_From", ce_from)
-		obj.set_descriptor("CE_To", ce_to)
+	errors, cnt = update_ranges(cmodel, path_curve, progress, cnt = 1, cmax = cmax)
+	if errors:
+		return cancel_progress(n_published, n_rows, errors)
 	
 	progress.update_state(text = "Creating tables", value = cnt, maximum = cmax)
 	table_meta = "c_14_metadata"
@@ -477,7 +411,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		if progress.cancel_pressed():
 			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		for value in data:
-			if value:
+			if value and (value != "unpublished"):
 				cursor.execute("INSERT INTO %s VALUES (%%s);" % (name), (value,))
 	
 	cnt += 1
@@ -520,6 +454,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		)
 	
 	n_published = 0
+	cls_c14 = cmodel.get_class("C_14_Analysis")
 	for obj in cls_c14.get_members(direct_only = True):
 		
 		cnt += 1
@@ -530,13 +465,11 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		obj_id = obj.id
 		vC_14_Activity = float_or_none(obj.get_descriptor("C_14_Activity_BP"))
 		vC_14_Uncertainty = float_or_none(obj.get_descriptor("C_14_Uncertainty_1Sig"))
-		if (vC_14_Activity is None) or (vC_14_Uncertainty is None):
-			continue
 		
 		vArch14CZ_ID = obj.get_descriptor("Arch14CZ_ID")
 		vC_14_Lab_Code = obj.get_descriptor("Lab_Code")
-		vC_14_CE_From = int(obj.get_descriptor("CE_From"))
-		vC_14_CE_To = int(obj.get_descriptor("CE_To"))
+		vC_14_CE_From = int_or_none(obj.get_descriptor("CE_From"))
+		vC_14_CE_To = int_or_none(obj.get_descriptor("CE_To"))
 		vC_14_Note = str_or_empty(obj.get_descriptor("Note_Analysis"))
 		is_public = obj.get_descriptor("Public")
 		if is_public is None:

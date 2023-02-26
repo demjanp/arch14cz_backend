@@ -2,8 +2,10 @@ from deposit.utils.fnc_serialize import (load_user_tool)
 import arch14cz_backend
 
 from arch14cz_backend.utils.fnc_phasing import (update_datings)
+from arch14cz_backend.utils.fnc_convert import (float_or_none)
 
 from openpyxl import load_workbook
+from datetime import datetime
 from copy import deepcopy
 import os
 
@@ -30,9 +32,12 @@ def create_schema(cmodel):
 		cmodel.add_user_tool(data)
 	
 	main_descriptors = [
+		"Arch14CZ_ID",
 		"Lab_Code",
 		"C_14_Activity_BP",
 		"C_14_Uncertainty_1Sig",
+		"CE_From",
+		"CE_To",
 		"Delta_C_13_per_mil",
 		"Public",
 		"Note_Analysis",
@@ -84,6 +89,36 @@ def create_schema(cmodel):
 	cls_lookup["Relative_Dating"].add_relation("Context", "dates")
 	
 	return cls_lookup
+
+def generate_ids(cmodel):
+	
+	n_rows = 0
+	arch_ids = set([])
+	cls_c14 = cmodel.get_class("C_14_Analysis")
+	
+	if cls_c14 is None:
+		return n_rows, ["C_14_Analysis Class not found"]
+	
+	for obj in cls_c14.get_members(direct_only = True):
+		n_rows += 1
+		arch_id = obj.get_descriptor("Arch14CZ_ID")
+		if arch_id is not None:
+			arch_ids.add(arch_id)
+	datestr = datetime.now().strftime("%Y%m%d")
+	objs = sorted(cls_c14.get_members(direct_only = True), key = lambda obj: obj.id)
+	for obj in objs:
+		arch_id = obj.get_descriptor("Arch14CZ_ID")
+		if arch_id is None:
+			n = 1
+			while True:
+				arch_id = "A14CZ_%s_%04d" % (datestr, n)
+				if arch_id not in arch_ids:
+					break
+				n += 1
+			obj.set_descriptor("Arch14CZ_ID", arch_id)
+			arch_ids.add(arch_id)
+	
+	return n_rows, []
 
 def import_xlsx(cmodel, path, fields, progress):
 	# fields[name] = column index
@@ -197,22 +232,13 @@ def import_xlsx(cmodel, path, fields, progress):
 		
 		c14_public = get_from_field("Public", fields, row)
 		
-		try:
-			c14_activity = float(c14_activity)
-		except:
-			errors.append("Invalid Entry: Row %d, C-14 Analysis C-14 Activity BP: %s" % (row_n, str(c14_activity)))
+		c14_activity = float_or_none(c14_activity)
+		c14_uncert = float_or_none(c14_uncert)
+		c14_delta13c = float_or_none(c14_delta13c)
+		
+		if (not c14_lab_code) and (c14_activity is None):
 			continue
-		try:
-			c14_uncert = float(c14_uncert)
-		except:
-			errors.append("Invalid Entry: Row %d, C-14 Analysis C-14 Uncert. 1 Sigma: %s" % (row_n, str(c14_uncert)))
-			continue
-		if c14_delta13c:
-			try:
-				c14_delta13c = float(c14_delta13c)
-			except:
-				errors.append("Invalid Entry: Row %d, Delta C-13: %s" % (row_n, c14_delta13c))
-				continue
+		
 		if c14_public:
 			try:
 				c14_public = int(c14_public)

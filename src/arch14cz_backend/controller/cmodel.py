@@ -5,8 +5,9 @@ from deposit.utils.fnc_files import (as_url)
 from deposit.utils.fnc_serialize import (encrypt_password)
 
 from arch14cz_backend.utils.fnc_frontend import (check_connection, publish_data)
-from arch14cz_backend.utils.fnc_import import (create_schema, import_xlsx)
-from arch14cz_backend.utils.fnc_phasing import (update_datings)
+from arch14cz_backend.utils.fnc_import import (create_schema, generate_ids, import_xlsx)
+from arch14cz_backend.utils.fnc_phasing import (update_datings, update_order)
+from arch14cz_backend.utils.fnc_radiocarbon import (update_ranges)
 
 import arch14cz_backend
 
@@ -140,6 +141,67 @@ class CModel(DCModel):
 	def update_datings(self):
 		
 		update_datings(self)
+	
+	def calc_order(self):
+		
+		self.cmain.cview.progress.show("Calculating")
+		self._model.blockSignals(True)
+		path_log = as_url(self.cmain.cview.get_logging_path())
+		errors = update_order(self, progress = self.cmain.cview.progress)
+		self.cmain.cview.progress.stop()
+		self.cmain.cview.show_notification(
+			'''Updated order of relative dates with %d errors.<br>(see <a href="%s">Log File</a> for details)''' % (
+				len(errors), path_log
+			)
+		)
+		self.cmain.cview.log_message(
+			"Updated order of relative dates.\nError Messages:\n%s" % (
+				"\n".join(errors)
+			)
+		)
+		self._model.blockSignals(False)
+		self.on_changed([],[])
+	
+	def calc_ranges(self):
+		
+		self.cmain.cview.progress.show("Calibrating")
+		self._model.blockSignals(True)
+		path_curve = self.get_cal_curve()
+		path_log = as_url(self.cmain.cview.get_logging_path())
+		errors, cnt = update_ranges(self, path_curve, progress = self.cmain.cview.progress)
+		self.cmain.cview.progress.stop()
+		self.cmain.cview.show_notification(
+			'''Calibrated %d C-14 dates with %d errors.<br>(see <a href="%s">Log File</a> for details)''' % (
+				cnt - 1, len(errors), path_log
+			)
+		)
+		self.cmain.cview.log_message(
+			"Calibrated %d C-14 dates.\nError Messages:\n%s" % (
+				cnt - 1, "\n".join(errors)
+			)
+		)
+		self._model.blockSignals(False)
+		self.on_changed([],[])
+	
+	def update_ids(self):
+		
+		self.cmain.cview.progress.show("Generating")
+		self._model.blockSignals(True)
+		path_log = as_url(self.cmain.cview.get_logging_path())
+		n_rows, errors = generate_ids(self)
+		self.cmain.cview.progress.stop()
+		self.cmain.cview.show_notification(
+			'''Generated Arch14CZ IDs with %d errors.<br>(see <a href="%s">Log File</a> for details)''' % (
+				len(errors), path_log
+			)
+		)
+		self.cmain.cview.log_message(
+			"Generated Arch14CZ IDs.\nError Messages:\n%s" % (
+				"\n".join(errors)
+			)
+		)
+		self._model.blockSignals(False)
+		self.on_changed([],[])
 	
 	def import_excel(self, path, fields):
 		# fields[name] = column index
