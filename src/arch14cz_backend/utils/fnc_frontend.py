@@ -135,7 +135,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		if progress.cancel_pressed():
 			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		if name in tables:
-			cursor.execute("DROP TABLE IF EXISTS \"%s\";" % (name))
+			cursor.execute("DROP TABLE IF EXISTS %s.\"%s\";" % (schema, name))
 	
 	# wait until tables are deleted
 	conn.commit()
@@ -151,13 +151,13 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		time.sleep(0.5)
 	if table_meta not in tables:
-		cursor.execute('''CREATE TABLE %s (
+		cursor.execute('''CREATE TABLE %s.%s (
 			"Variable" TEXT,
 			"Value" TEXT
-		);''' % (table_meta))
+		);''' % (schema, table_meta))
 	
 	if table_main not in tables:
-		cursor.execute('''CREATE TABLE %s (
+		cursor.execute('''CREATE TABLE %s.%s (
 			"Arch14CZ_ID" TEXT,
 			"C_14_Lab_Code" TEXT,
 			"C_14_Activity" REAL,
@@ -187,31 +187,31 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			"Material_Note" TEXT,
 			"Source" TEXT,
 			PRIMARY KEY ("Arch14CZ_ID")
-		);''' % (table_main))
+		);''' % (schema, table_main))
 	for name in [table_country, table_activity_area, table_feature, table_material]:
 		cnt += 1
 		progress.update_state(value = cnt, maximum = cmax)
 		if progress.cancel_pressed():
 			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		if name not in tables:
-			cursor.execute('''CREATE TABLE %s (
+			cursor.execute('''CREATE TABLE %s.%s (
 				"Name" TEXT
-			);''' % (name))
+			);''' % (schema, name))
 	for name in [table_district, table_cadastre]:
 		cnt += 1
 		progress.update_state(value = cnt, maximum = cmax)
 		if progress.cancel_pressed():
 			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		if name not in tables:
-			cursor.execute('''CREATE TABLE %s (
+			cursor.execute('''CREATE TABLE %s.%s (
 				"Code" TEXT,
 				"Name" TEXT
-			);''' % (name))
+			);''' % (schema, name))
 	if table_relative_dating not in tables:
-		cursor.execute('''CREATE TABLE %s (
+		cursor.execute('''CREATE TABLE %s.%s (
 			"Code" TEXT,
 			"Name" TEXT
-		);''' % (table_relative_dating))
+		);''' % (schema, table_relative_dating))
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
@@ -412,7 +412,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		for value in data:
 			if value and (value != "unpublished"):
-				cursor.execute("INSERT INTO %s VALUES (%%s);" % (name), (value,))
+				cursor.execute("INSERT INTO %s.%s VALUES (%%s);" % (schema, name), (value,))
 	
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
@@ -423,7 +423,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			code = "%s#%s" % (country_code, district)
 			label = "%s" % (district)
 			cursor.execute(
-				"INSERT INTO %s VALUES (%%s, %%s);" % (table_district), 
+				"INSERT INTO %s.%s VALUES (%%s, %%s);" % (schema, table_district), 
 				(code, label)
 			)
 	
@@ -436,7 +436,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			code = "%s#%s#%s" % (country_code, district, cadastre)
 			label = "%s (%s)" % (cadastre, district)
 			cursor.execute(
-				"INSERT INTO %s VALUES (%%s, %%s);" % (table_cadastre), 
+				"INSERT INTO %s.%s VALUES (%%s, %%s);" % (schema, table_cadastre), 
 				(code, label)
 			)
 	
@@ -449,7 +449,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			continue
 		code = "%d#%d" % (order_min, order_max)
 		cursor.execute(
-			"INSERT INTO %s VALUES (%%s, %%s);" % (table_relative_dating), 
+			"INSERT INTO %s.%s VALUES (%%s, %%s);" % (schema, table_relative_dating), 
 			(code, name)
 		)
 	
@@ -516,7 +516,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		vRelative_Dating_Order = sorted(list(vRelative_Dating_Order))
 		
 		cursor.execute(
-			"INSERT INTO %s VALUES (%s);" % (table_main, ", ".join(["%s"]*28)), 
+			"INSERT INTO %s.%s VALUES (%s);" % (schema, table_main, ", ".join(["%s"]*28)), 
 			(
 				vArch14CZ_ID,
 				vC_14_Lab_Code,
@@ -552,7 +552,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	
 	datestr = datetime.now().strftime("%d-%m-%Y")
 	cursor.execute(
-		"INSERT INTO %s VALUES (%%s, %%s);" % (table_meta), 
+		"INSERT INTO %s.%s VALUES (%%s, %%s);" % (schema, table_meta), 
 		("date_updated", datestr)
 	)
 	

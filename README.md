@@ -71,7 +71,7 @@ All field groups except `Relative Dating` and `Source` have a drop-down list, wi
 For the frontend database to function properly, relative datings have to be ordered. This is done by creating `before` type relations between the relative dating entries, which indicate that one relative dating is earlier (before) another. Based on these relations, the Arch14CZ application can then calculate ordering of the dates which can be used to specify a relative dating range when querying the database.
 
 1. Open the backend database using the command `Backend` &rarr; `Open`.
-2. Open the `Relative Dating` Class by double-clicking its name in the left navigator pane.
+2. Open the `Relative Dating` Class by double-clicking its name in the left navigator pane. Alternatively, you can click on the `Relative Datings - General` tool on the `User Tools` toolbar to list only general datings, without specified phases.
 3. Click the `Graph` tab on the query window.
 4. Find an entry that is not yet linked to at least one other entry. All entries should have at least one link an earlier and one link to a later dating (as far as there is one).
 5. Find the closest dating which is later than the selected one and create a `before` type relation to it as shown in the animation:
@@ -106,7 +106,7 @@ The file has to contain the following columns:
 13. Site Coordinates:
     WGS 84 standard, format XX.XXXXXXXN, XX.XXXXXXXE
 14. Site Note
-15. Site AMCR ID
+15. AMCR ID
 	Identifier of an archaeological event ('akce') in the [Archaeological Map of the Czech Republic](https://amcr-info.aiscr.cz/)
 16. Activity Area:
     Type of the archaeological activity area.

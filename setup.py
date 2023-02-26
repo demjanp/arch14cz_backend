@@ -40,7 +40,7 @@ setup(
 	packages=find_packages(where="src"),
 	python_requires=">=3.10, <4",
 	install_requires=[
-		'deposit_gui>=1.4.36, <1.5',
+		'deposit_gui>=1.4.38, <1.5',
 		'numpy>=1.24.1',
 		'scipy>=1.10.0, <2',
 	],

@@ -10,24 +10,24 @@ from copy import deepcopy
 import os
 
 def create_schema(cmodel):
-	# create database schema, data entry & search form
+	# create database schema and add user tools
 	#
 	# returns cls_lookup = {class_name: Class, ...}
 	
 	has_form = False
-	has_search = False
+	has_query = False
 	for data in cmodel.get_user_tools():
 		if (data["typ"] == "EntryForm") and (data["label"] == "C14 Form"):
 			has_form = True
-		if (data["typ"] == "SearchForm") and (data["label"] == "C14 Search"):
-			has_search = True
+		if (data["typ"] == "Query") and (data["label"] == "Relative Datings - General"):
+			has_query = True
 	folder = os.path.dirname(arch14cz_backend.__file__)
 	if not has_form:
 		path = os.path.join(folder, "c14_entry_form.txt")
 		data = load_user_tool(path)
 		cmodel.add_user_tool(data)
-	if not has_search:
-		path = os.path.join(folder, "c14_search.txt")
+	if not has_query:
+		path = os.path.join(folder, "c14_query.txt")
 		data = load_user_tool(path)
 		cmodel.add_user_tool(data)
 	
