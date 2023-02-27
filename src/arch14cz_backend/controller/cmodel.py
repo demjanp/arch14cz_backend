@@ -6,7 +6,7 @@ from deposit.utils.fnc_serialize import (encrypt_password)
 
 from arch14cz_backend.utils.fnc_frontend import (check_connection, publish_data)
 from arch14cz_backend.utils.fnc_import import (create_schema, generate_ids, import_xlsx)
-from arch14cz_backend.utils.fnc_phasing import (update_datings, update_order)
+from arch14cz_backend.utils.fnc_phasing import (update_datings, update_order, vis_order)
 from arch14cz_backend.utils.fnc_radiocarbon import (update_ranges)
 
 import arch14cz_backend
@@ -229,6 +229,10 @@ class CModel(DCModel):
 	def set_cal_curve(self, path):
 		
 		self._cal_curve = path
+	
+	def vis_dating_order(self, detailed = False):
+		
+		vis_order(self, detailed)
 	
 	
 	# ---- Deposit

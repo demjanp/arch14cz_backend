@@ -54,6 +54,9 @@ class CActions(DCActions):
 				("CalcOrder", "Calculate Dating Order"),
 				("CalcRanges", "Calibrate C-14 Dates"),
 				("GenIDs", "Generate Arch14CZ IDs"),
+				None,
+				("DatingOrder", "View Relative Dating Order"),
+				("DatingOrderDetail", "View Relative Dating Order - Detailed"),
 			],
 			"Frontend": [
 				("ConnectFrontend", "Connect"),
@@ -279,6 +282,32 @@ class CActions(DCActions):
 	def on_GenIDs(self, state):
 		
 		self.cmain.cmodel.update_ids()
+	
+	
+	def update_DatingOrder(self):
+		
+		return dict(
+			help = "View Relative Dating Order",
+			checkable = False,
+			enabled = True,
+		)
+	
+	def on_DatingOrder(self, state):
+		
+		self.cmain.cmodel.vis_dating_order()
+
+
+	def update_DatingOrderDetail(self):
+		
+		return dict(
+			help = "View Relative Dating Order - Detailed",
+			checkable = False,
+			enabled = True,
+		)
+	
+	def on_DatingOrderDetail(self, state):
+		
+		self.cmain.cmodel.vis_dating_order(detailed = True)
 	
 	
 	def update_CalCurve(self):

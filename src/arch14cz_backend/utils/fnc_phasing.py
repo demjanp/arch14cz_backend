@@ -1,5 +1,6 @@
 import numpy as np
 import networkx as nx
+from matplotlib import pyplot
 
 def update_datings(cmodel):
 	# cmodel = Deposit GUI DCModel
@@ -188,8 +189,6 @@ def get_phasing(cmodel,
 	
 	return phasing, names, circulars
 
-
-
 def update_order(cmodel, progress = None):
 	
 	errors = []
@@ -219,3 +218,49 @@ def update_order(cmodel, progress = None):
 	
 	return errors
 
+
+def vis_order(cmodel, detailed = False):
+	
+	phasing, names, circulars = get_phasing(cmodel)
+	# phasing = {obj_id: [phase_min, phase_max], ...}; phase_min/max = -1 if no chronological relations found
+	# names = {obj_id: name, ...}
+	# circulars = [obj_id, ...]
+	
+	errors = []
+	
+	if circulars:
+		errors = ["Circular relations found between the following datings:"]
+		for obj_id in circulars:
+			errors.append("\t%s" % (names[obj_id]))
+		return errors
+	
+	for obj_id in list(phasing.keys()):
+		if phasing[obj_id] == [None, None]:
+			del phasing[obj_id]
+	
+	phmax = 0
+	for i in phasing:
+		phmax = max(phmax, phasing[i][1])
+
+	node_ids = sorted(list(phasing.keys()), key = lambda idx: phasing[idx][0])
+	
+	pyplot.figure(figsize = (12, 6))
+	y = 0
+	for obj_id in node_ids:
+		if (not detailed) and ("," in names[obj_id]):
+			continue
+		x0, x1 = phasing[obj_id]
+		if x0 == x1:
+			pyplot.plot([x0], [y], "o", color = "gray")
+		else:
+			pyplot.barh(y = y, width = x1 - x0, left = x0, height = 0.5, color = "lightgray")
+		pyplot.text((x0 + x1) / 2, y, names[obj_id], horizontalalignment = "center", verticalalignment = "center")
+		y += 1
+	pyplot.xlim(-1, phmax + 1)
+	pyplot.xticks(list(range(phmax + 1)), list(range(phmax + 2))[1:])
+	pyplot.yticks([], [])
+	pyplot.xlabel("Order")
+	pyplot.tight_layout()
+	pyplot.show()
+	
+	return errors
