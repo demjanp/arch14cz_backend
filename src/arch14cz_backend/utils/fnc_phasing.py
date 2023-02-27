@@ -218,7 +218,6 @@ def update_order(cmodel, progress = None):
 	
 	return errors
 
-
 def vis_order(cmodel, detailed = False):
 	
 	phasing, names, circulars = get_phasing(cmodel)

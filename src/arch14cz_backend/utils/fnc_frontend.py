@@ -171,6 +171,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			"Country_Code" TEXT,
 			"District" TEXT,
 			"Cadastre" TEXT,
+			"Cadastre_Code" TEXT,
 			"Site" TEXT,
 			"Coordinates" TEXT,
 			"AMCR_ID" TEXT,
@@ -244,12 +245,12 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	lookup_Context = {}  # {obj_id: {Name, Description, Depth}, ...}
 	lookup_Site = {}  # {obj_id: {Name, Location}, ...}
 	lookup_CountryDistrictCadastre = {} 
-		# {obj_id: {Country, Country_Code, District, Cadastre}, ...}
+		# {obj_id: {Country, Country_Code, District, Cadastre, Cadastre_Code}, ...}
 	query = cmodel.get_query(
 		"SELECT C_14_Analysis.Arch14CZ_ID, Sample.Number, \
 			Context.Name, Context.Description, Context.Depth, \
 			Site.Name, Site.Location, Site.AMCR_ID, \
-			Cadastre.Name, District.Name, Country.Name",
+			Cadastre.Name, Cadastre.Code, District.Name, Country.Name",
 		silent = True
 	)
 	for row in range(len(query)):
@@ -275,6 +276,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			"Country_Code": str_or_empty(query[row, "Country", "Name"][0]),
 			"District": str_or_empty(query[row, "District", "Name"][1]),
 			"Cadastre": str_or_empty(query[row, "Cadastre", "Name"][1]),
+			"Cadastre_Code": str_or_empty(query[row, "Cadastre", "Code"][1]),
 		}
 		dict_country.add(lookup_CountryDistrictCadastre[obj_id]["Country"])
 		dict_district.add((
@@ -284,7 +286,8 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		dict_cadastre.add((
 			lookup_CountryDistrictCadastre[obj_id]["Cadastre"], 
 			lookup_CountryDistrictCadastre[obj_id]["District"], 
-			lookup_CountryDistrictCadastre[obj_id]["Country_Code"]
+			lookup_CountryDistrictCadastre[obj_id]["Country_Code"],
+			lookup_CountryDistrictCadastre[obj_id]["Cadastre_Code"],
 		))
 	
 	lookup_Reliability = {}   # {obj_id: Name, ...}
@@ -346,9 +349,12 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		silent = True
 	)
 	for row in range(len(query)):
+		uri = str_or_empty(query[row, "Source", "URI"][1])
+#		if uri:
+#			uri = '''<a href="%s">%s</a>''' % (uri, uri)
 		lookup_Source[query[row, "C_14_Analysis", "Arch14CZ_ID"][0]].append({
 			"Description": str_or_empty(query[row, "Source", "Description"][1]),
-			"URI": str_or_empty(query[row, "Source", "URI"][1]),
+			"URI": uri,
 			"Reference": str_or_empty(query[row, "Source", "Reference"][1]),
 		})
 	cnt += 1
@@ -431,9 +437,9 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
 		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
-	for cadastre, district, country_code in dict_cadastre:
+	for cadastre, district, country_code, cadastre_code in dict_cadastre:
 		if cadastre:
-			code = "%s#%s#%s" % (country_code, district, cadastre)
+			code = "%s#%s#%s#%s" % (country_code, district, cadastre, cadastre_code)
 			label = "%s (%s)" % (cadastre, district)
 			cursor.execute(
 				"INSERT INTO %s.%s VALUES (%%s, %%s);" % (schema, table_cadastre), 
@@ -480,11 +486,17 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			continue
 		vReliability = lookup_Reliability[obj_id] if obj_id in lookup_Reliability else ""
 		vReliability_Note = str_or_empty(obj.get_descriptor("Note_Reliability"))
+		vCountry = ""
+		vCountryCode = ""
+		vDistrict = ""
+		vCadastre = ""
+		vCadastreCode = ""
 		if obj_id in lookup_CountryDistrictCadastre:
 			vCountry = lookup_CountryDistrictCadastre[obj_id]["Country"]
 			vCountryCode = lookup_CountryDistrictCadastre[obj_id]["Country_Code"]
 			vDistrict = lookup_CountryDistrictCadastre[obj_id]["District"]
 			vCadastre = lookup_CountryDistrictCadastre[obj_id]["Cadastre"]
+			vCadastreCode = lookup_CountryDistrictCadastre[obj_id]["Cadastre_Code"]
 		vSite = lookup_Site[obj_id]["Name"] if obj_id in lookup_Site else ""
 		vCoordinates = lookup_Site[obj_id]["Location"] if obj_id in lookup_Site else ""
 		vAMCR_ID = lookup_Site[obj_id]["AMCR_ID"] if obj_id in lookup_Site else ""
@@ -516,7 +528,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		vRelative_Dating_Order = sorted(list(vRelative_Dating_Order))
 		
 		cursor.execute(
-			"INSERT INTO %s.%s VALUES (%s);" % (schema, table_main, ", ".join(["%s"]*28)), 
+			"INSERT INTO %s.%s VALUES (%s);" % (schema, table_main, ", ".join(["%s"]*29)), 
 			(
 				vArch14CZ_ID,
 				vC_14_Lab_Code,
@@ -531,6 +543,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 				vCountryCode,
 				vDistrict,
 				vCadastre,
+				vCadastreCode,
 				vSite,
 				vCoordinates,
 				vAMCR_ID,
