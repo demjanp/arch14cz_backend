@@ -17,3 +17,5 @@ robocopy /e installer\pygraphviz dist\arch14cz\deposit_gui\dgui\pygraphviz
 copy installer\arch14cz_icon.ico dist\arch14cz
 copy src\arch14cz_backend\THIRDPARTY.TXT dist\arch14cz
 python installer\make_ifp.py
+
+pip install -e .

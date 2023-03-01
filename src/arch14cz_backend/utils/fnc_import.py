@@ -282,6 +282,9 @@ def import_xlsx(cmodel, path, fields, progress):
 	
 	relative_datings = []
 	sources = []
+	check_site_cadastre = {}	# {site_idx: cadastre_obj_id, ...}
+	check_context_site = {}		# {context_idx: site_idx, ...}
+	check_sample_context = {}	# {sample_idx: context_idx, ...}
 	
 	wb = load_workbook(filename = path, read_only = True)
 	for sheet in wb.sheetnames:
@@ -328,7 +331,7 @@ def import_xlsx(cmodel, path, fields, progress):
 		site_name = get_from_field("Site Name", fields, row)
 		site_coordinates = get_from_field("Site Coordinates", fields, row)
 		site_note = get_from_field("Site Note", fields, row)
-		site_amcr_id = get_from_field("AMCR ID", fields, row)
+		site_amcr_id = get_from_field("Fieldwork Event AMCR ID", fields, row)
 		
 		activity_area = get_from_field("Activity Area", fields, row)
 		if activity_area not in valid_activity_areas:
@@ -380,7 +383,7 @@ def import_xlsx(cmodel, path, fields, progress):
 		c14_uncert = float_or_none(c14_uncert)
 		c14_delta13c = float_or_none(c14_delta13c)
 		
-		if (not c14_lab_code) and (c14_activity is None):
+		if (not c14_lab_code):
 			continue
 		
 		if c14_public:
@@ -439,6 +442,27 @@ def import_xlsx(cmodel, path, fields, progress):
 				other_data[key].append(deepcopy(row_data[key]))
 				row_idxs[key] = len(other_data[key]) - 1
 		
+		# check for Sites in >1 Cadastre
+		if row_idxs["Site"] not in check_site_cadastre:
+			check_site_cadastre[row_idxs["Site"]] = obj_cadastre.id
+		if obj_cadastre.id != check_site_cadastre[row_idxs["Site"]]:
+			errors.append("Row %d: Site assigned to more than one Cadastre" % (row_n))
+			continue
+		
+		# check for Contexts in >1 Site
+		if row_idxs["Context"] not in check_context_site:
+			check_context_site[row_idxs["Context"]] = row_idxs["Site"]
+		if row_idxs["Site"] != check_context_site[row_idxs["Context"]]:
+			errors.append("Row %d: Context assigned to more than one Sites" % (row_n))
+			continue
+		
+		# check for Samples in >1 Context
+		if row_idxs["Sample"] not in check_sample_context:
+			check_sample_context[row_idxs["Sample"]] = row_idxs["Context"]
+		if row_idxs["Context"] != check_sample_context[row_idxs["Sample"]]:
+			errors.append("Row %d: Sample assigned to more than one Context" % (row_n))
+			continue
+		
 		source_idxs = []
 		sources_row = [
 			{
@@ -483,8 +507,6 @@ def import_xlsx(cmodel, path, fields, progress):
 			deepcopy(row_idxs), 
 			deepcopy(relative_dating_idxs), 
 			deepcopy(source_idxs),
-			obj_country,
-			obj_district,
 			obj_cadastre,
 			obj_activity_area,
 			obj_feature,
@@ -529,8 +551,7 @@ def import_xlsx(cmodel, path, fields, progress):
 	
 	for (
 			c_14_analysis, other_idxs, relative_dating_idxs, source_idxs, 
-			obj_country, obj_district, obj_cadastre, 
-			obj_activity_area, obj_feature, obj_material,
+			obj_cadastre, obj_activity_area, obj_feature, obj_material,
 		) in c14_data:
 			
 			row_n += 1
@@ -540,7 +561,7 @@ def import_xlsx(cmodel, path, fields, progress):
 				cmodel.on_changed([],[])
 				return 0, n_rows, ["Cancelled by user"]
 			
-			obj_c_14 = find_or_add_obj(cmodel, cls_lookup["C_14_Analysis"], c_14_analysis)
+			obj_c_14 = cmodel.add_object_with_descriptors(cls_lookup["C_14_Analysis"], c_14_analysis)
 			
 			obj_site = obj_lookup["Site"][other_idxs["Site"]]
 			obj_context = obj_lookup["Context"][other_idxs["Context"]]
@@ -565,6 +586,42 @@ def import_xlsx(cmodel, path, fields, progress):
 			
 			for idx in source_idxs:
 				obj_lookup["Source"][idx].add_relation(obj_c_14, "describes")
+	
+	# check for Sites in >1 Cadastre
+	for obj1 in cls_lookup["Site"].get_members(direct_only = True):
+		n_found = 0
+		for obj2, rel in obj1.get_relations():
+			if rel != "~contains":
+				continue
+			if "Cadastre" not in obj2.get_class_names():
+				continue
+			n_found += 1
+		if n_found > 1:
+			errors.append("Site ID %d assigned to more than one Cadastre" % (obj1.id))
+	
+	# check for Contexts in >1 Site
+	for obj1 in cls_lookup["Context"].get_members(direct_only = True):
+		n_found = 0
+		for obj2, rel in obj1.get_relations():
+			if rel != "~contains":
+				continue
+			if "Site" not in obj2.get_class_names():
+				continue
+			n_found += 1
+		if n_found > 1:
+			errors.append("Context ID %d assigned to more than one Site" % (obj1.id))
+	
+	# check for Samples in >1 Context
+	for obj1 in cls_lookup["Sample"].get_members(direct_only = True):
+		n_found = 0
+		for obj2, rel in obj1.get_relations():
+			if rel != "~contains":
+				continue
+			if "Context" not in obj2.get_class_names():
+				continue
+			n_found += 1
+		if n_found > 1:
+			errors.append("Sample ID %d assigned to more than one Context" % (obj1.id))
 	
 	update_datings(cmodel)
 	

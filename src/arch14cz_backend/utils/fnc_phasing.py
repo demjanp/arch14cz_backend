@@ -63,22 +63,30 @@ def get_phasing(cmodel,
 			return G
 		
 		for obj in cls.get_members(direct_only = True):
-			if general_only and (obj.get_descriptor(general_descr) != "1"):
+			if general_only and (obj.get_descriptor(general_descr) != 1):
 				continue
 			G.add_node(obj.id, name = obj.get_descriptor(name_descr))
 		for obj1 in cls.get_members(direct_only = True):
+			if general_only and (obj1.get_descriptor(general_descr) != 1):
+				continue
 			objs1 = set([obj1.id])
 			for obj, rel in obj1.get_relations():
 				if rel != contains_rel:
+					continue
+				if general_only and (obj.get_descriptor(general_descr) != 1):
 					continue
 				objs1.add(obj.id)
 			objs2 = set()
 			for obj2, rel in obj1.get_relations():
 				if rel != before_rel:
 					continue
+				if general_only and (obj2.get_descriptor(general_descr) != 1):
+					continue
 				objs2.add(obj2.id)
 				for obj, rel in obj2.get_relations():
 					if rel != contains_rel:
+						continue
+					if general_only and (obj.get_descriptor(general_descr) != 1):
 						continue
 					objs2.add(obj.id)
 			if not objs2:

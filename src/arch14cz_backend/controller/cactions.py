@@ -50,8 +50,8 @@ class CActions(DCActions):
 				("ImportExcel", "Import Excel Data"),
 				None,
 				("CreateSchema", "Create Schema"),
-				("UpdateDatings", "Update Datings"),
-				("CalcOrder", "Calculate Dating Order"),
+				("UpdateDatings", "Update Rel. Dating Hierarchy"),
+				("CalcOrder", "Calculate Rel. Dating Order"),
 				("CalcRanges", "Calibrate C-14 Dates"),
 				("GenIDs", "Generate Arch14CZ IDs"),
 				None,
@@ -231,7 +231,7 @@ class CActions(DCActions):
 	def update_UpdateDatings(self):
 		
 		return dict(
-			help = "Add 'contains' relation between general and detailed datings",
+			help = "Add 'contains' relation between general and detailed relative datings.",
 			checkable = False,
 			enabled = True,
 		)
@@ -248,7 +248,7 @@ class CActions(DCActions):
 	def update_CalcOrder(self):
 		
 		return dict(
-			help = "Calculate Relative Dating Order",
+			help = "Calculate order of relative datings.",
 			checkable = False,
 			enabled = True,
 		)

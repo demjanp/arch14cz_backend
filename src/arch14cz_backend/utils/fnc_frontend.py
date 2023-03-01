@@ -174,7 +174,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			"Cadastre" TEXT,
 			"Cadastre_Code" INTEGER,
 			"Site" TEXT,
-			"Site_AMCR_ID" TEXT,
+			"Fieldwork_Event_ID" TEXT,
 			"Coordinates" TEXT,
 			"Activity_Area" TEXT,
 			"Activity_Area_AMCR_ID" TEXT,
@@ -545,7 +545,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			vCadastreCode = lookup_CountryDistrictCadastre[obj_id]["Cadastre_Code"]
 		vSite = lookup_Site[obj_id]["Name"] if obj_id in lookup_Site else ""
 		vCoordinates = lookup_Site[obj_id]["Location"] if obj_id in lookup_Site else ""
-		vSite_AMCR_ID = lookup_Site[obj_id]["AMCR_ID"] if obj_id in lookup_Site else ""
+		vFieldwork_Event_ID = lookup_Site[obj_id]["AMCR_ID"] if obj_id in lookup_Site else ""
 		vActivity_Area = lookup_Activity_Area[obj_id]["Name"]
 		vActivity_Area_AMCR_ID = lookup_Activity_Area[obj_id]["AMCR_ID"]
 		vFeature = lookup_Feature[obj_id]["Name"]
@@ -599,7 +599,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 				vCadastre,
 				vCadastreCode,
 				vSite,
-				vSite_AMCR_ID,
+				vFieldwork_Event_ID,
 				vCoordinates,
 				vActivity_Area,
 				vActivity_Area_AMCR_ID,

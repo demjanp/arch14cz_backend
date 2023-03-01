@@ -108,8 +108,8 @@ The file has to contain the following columns:
 12. Site Coordinates:
     WGS 84 standard, format XX.XXXXXXXN, XX.XXXXXXXE
 13. Site Note
-14. AMCR ID
-	Identifier of an archaeological event ('akce') in the [Archaeological Map of the Czech Republic](https://amcr-info.aiscr.cz/)
+14. Fieldwork Event ID
+	Identifier of a Fieldwork Event in the [Archaeological Map of the Czech Republic](https://amcr-info.aiscr.cz/) associated with the Site
 15. Activity Area:
     Type of the archaeological activity area according to the AMCR dictionary.
     Validated against [activity_area.csv](src/arch14cz_backend/data/activity_area.csv).
@@ -121,7 +121,7 @@ The file has to contain the following columns:
 18. Context Depth cm:
     Depth at which the sample was retrieved.
 19. Context Name:
-    Identifier of the context within the site (e.g., Feature 123).
+    Unique identifier of the context within the site (e.g., Feature 123).
 20. Relative Dating Name 1:
     Relative dating of the context, as detailed as possible in the format "[General Dating], [phase]" (e.g., Lengyel Culture, phase I).
     The general dating is validated against [relative_dating.csv](src/arch14cz_backend/data/relative_dating.csv).

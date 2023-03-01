@@ -126,7 +126,7 @@ class CModel(DCModel):
 		self.cmain.cview.show_notification(
 			'''Published %d/%d rows with %d errors.<br>(see <a href="%s">Log File</a> for details)''' % (
 				n_published, n_rows, len(errors), path_log
-			)
+			), delay = 7000
 		)
 		self.cmain.cview.log_message(
 			"Published %d/%d rows.\nError Messages:\n%s" % (
@@ -220,7 +220,7 @@ class CModel(DCModel):
 		self.cmain.cview.show_notification(
 			'''Imported %d/%d rows with %d errors.<br>(see <a href="%s">Log File</a> for details)''' % (
 				n_imported, n_rows, len(errors), path_log
-			)
+			), delay = 7000
 		)
 		self.cmain.cview.log_message(
 			"Imported %d/%d rows.\nError Messages:\n%s" % (
