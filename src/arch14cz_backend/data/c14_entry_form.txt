@@ -6,7 +6,9 @@
 	<ComboBox Cadastre.Name style="">Cadastre</>
 	<LineEdit Cadastre.Code style="">Cadastre - Code</>
 	<ComboBox District.Name style="">District</>
+	<LineEdit District.Code style="">District - Code</>
 	<ComboBox Country.Name style="">Country</>
+	<LineEdit Country.Code style="">Country - Code</>
 </>
 <Group style="QGroupBox {font-weight: bold;}">Site
 	<LineEdit Site.Name style="">Name</>
@@ -19,10 +21,13 @@
 	<LineEdit Context.Depth style="">Depth</>
 	<PlainTextEdit Context.Description style="">Description</>
 	<ComboBox Activity_Area.Name style="">Activity_Area</>
+	<LineEdit Activity_Area.AMCR_ID style="">Activity_Area AMCR ID</>
 	<ComboBox Feature.Name style="">Feature</>
+	<LineEdit Feature.AMCR_ID style="">Feature AMCR ID</>
 </>
 <MultiGroup style="QGroupBox {font-weight: bold;}">Relative dating
 	<ComboBox Relative_Dating.Name style="">Name</>
+	<LineEdit Relative_Dating.AMCR_ID style="">AMCR ID</>
 </>
 <Group style="QGroupBox {font-weight: bold;}">Dating Reliability
 	<ComboBox Reliability.Name style="">Description</>
@@ -33,6 +38,7 @@
 </>
 <Group style="QGroupBox {font-weight: bold;}">Material
 	<ComboBox Material.Name style="">Name</>
+	<LineEdit Material.AMCR_ID style="">AMCR ID</>
 </>
 <Group style="QGroupBox {font-weight: bold;}">14C Analysis
 	<LineEdit C_14_Analysis.Lab_Code style="">Lab code</>
