@@ -1,0 +1,6 @@
+
+<Title>Relative Datings - General</>
+<Type Query/>
+		
+<QueryString>SELECT Relative_Dating.* WHERE Relative_Dating.General == 1</>
+		

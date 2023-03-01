@@ -94,7 +94,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	if errors:
 		return cancel_progress(n_published, n_rows, errors)
 	
-	cmax = 3*n_rows + 31
+	cmax = 3*n_rows + 32
 	
 	progress.update_state(text = "Calibrating C-14 dates")
 	errors, cnt = update_ranges(cmodel, path_curve, progress, cnt = 1, cmax = cmax)
@@ -170,33 +170,39 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			"Country" TEXT,
 			"Country_Code" TEXT,
 			"District" TEXT,
+			"District_Code" INTEGER,
 			"Cadastre" TEXT,
-			"Cadastre_Code" TEXT,
+			"Cadastre_Code" INTEGER,
 			"Site" TEXT,
+			"Site_AMCR_ID" TEXT,
 			"Coordinates" TEXT,
-			"AMCR_ID" TEXT,
-			"Context_Name" TEXT,
+			"Activity_Area" TEXT,
+			"Activity_Area_AMCR_ID" TEXT,
+			"Feature" TEXT,
+			"Feature_AMCR_ID" TEXT,
 			"Context_Description" TEXT,
 			"Context_Depth" TEXT,
-			"Activity_Area" TEXT,
-			"Feature" TEXT,
+			"Context_Name" TEXT,
 			"Relative_Dating_Name" TEXT,
+			"Relative_Dating_AMCR_ID" TEXT,
 			"Relative_Dating_Order" INTEGER[],
 			"Sample_Number" TEXT,
 			"Sample_Note" TEXT,
 			"Material" TEXT,
+			"Material_AMCR_ID" TEXT,
 			"Material_Note" TEXT,
 			"Source" TEXT,
 			PRIMARY KEY ("Arch14CZ_ID")
 		);''' % (schema, table_main))
-	for name in [table_country, table_activity_area, table_feature, table_material]:
+	for name in [table_activity_area, table_feature, table_material]:
 		cnt += 1
 		progress.update_state(value = cnt, maximum = cmax)
 		if progress.cancel_pressed():
 			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 		if name not in tables:
 			cursor.execute('''CREATE TABLE %s.%s (
-				"Name" TEXT
+				"Name" TEXT,
+				"AMCR_ID" TEXT
 			);''' % (schema, name))
 	for name in [table_district, table_cadastre]:
 		cnt += 1
@@ -206,12 +212,24 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		if name not in tables:
 			cursor.execute('''CREATE TABLE %s.%s (
 				"Code" TEXT,
-				"Name" TEXT
+				"Name" TEXT,
+				"ID" INTEGER
 			);''' % (schema, name))
+	
+	if table_country not in tables:
+		cursor.execute('''CREATE TABLE %s.%s (
+			"Code" TEXT,
+			"Name" TEXT,
+			"ID" TEXT
+		);''' % (schema, table_country))
+	
 	if table_relative_dating not in tables:
 		cursor.execute('''CREATE TABLE %s.%s (
 			"Code" TEXT,
-			"Name" TEXT
+			"Name" TEXT,
+			"AMCR_ID" TEXT,
+			"Order_Min" INT,
+			"Order_Max" INT
 		);''' % (schema, table_relative_dating))
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
@@ -250,7 +268,7 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		"SELECT C_14_Analysis.Arch14CZ_ID, Sample.Number, \
 			Context.Name, Context.Description, Context.Depth, \
 			Site.Name, Site.Location, Site.AMCR_ID, \
-			Cadastre.Name, Cadastre.Code, District.Name, Country.Name",
+			Cadastre.Name, Cadastre.Code, District.Name, District.Code, Country.Name, Country.Code",
 		silent = True
 	)
 	for row in range(len(query)):
@@ -273,15 +291,20 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		}
 		lookup_CountryDistrictCadastre[obj_id] = {
 			"Country": str_or_empty(query[row, "Country", "Name"][1]),
-			"Country_Code": str_or_empty(query[row, "Country", "Name"][0]),
+			"Country_Code": str_or_empty(query[row, "Country", "Code"][1]),
 			"District": str_or_empty(query[row, "District", "Name"][1]),
+			"District_Code": str_or_empty(query[row, "District", "Code"][1]),
 			"Cadastre": str_or_empty(query[row, "Cadastre", "Name"][1]),
 			"Cadastre_Code": str_or_empty(query[row, "Cadastre", "Code"][1]),
 		}
-		dict_country.add(lookup_CountryDistrictCadastre[obj_id]["Country"])
+		dict_country.add((
+			lookup_CountryDistrictCadastre[obj_id]["Country"],
+			lookup_CountryDistrictCadastre[obj_id]["Country_Code"],
+		))
 		dict_district.add((
 			lookup_CountryDistrictCadastre[obj_id]["District"], 
-			lookup_CountryDistrictCadastre[obj_id]["Country_Code"]
+			lookup_CountryDistrictCadastre[obj_id]["Country_Code"],
+			lookup_CountryDistrictCadastre[obj_id]["District_Code"],
 		))
 		dict_cadastre.add((
 			lookup_CountryDistrictCadastre[obj_id]["Cadastre"], 
@@ -303,40 +326,49 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	if progress.cancel_pressed():
 		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	
-	lookup_Activity_Area = {}   # {obj_id: Name, ...}
+	lookup_Activity_Area = {}   # {obj_id: {Name, AMCR_ID}, ...}
 	query = cmodel.get_query(
-		"SELECT C_14_Analysis.Arch14CZ_ID, Activity_Area.Name", silent = True
+		"SELECT C_14_Analysis.Arch14CZ_ID, Activity_Area.Name, Activity_Area.AMCR_ID", silent = True
 	)
 	for row in range(len(query)):
-		value = str_or_empty(query[row, "Activity_Area", "Name"][1])
-		lookup_Activity_Area[query[row, "C_14_Analysis", "Arch14CZ_ID"][0]] = value
-		dict_activity_area.add(value)
+		name = str_or_empty(query[row, "Activity_Area", "Name"][1])
+		amcr_id = str_or_empty(query[row, "Activity_Area", "AMCR_ID"][1])
+		lookup_Activity_Area[query[row, "C_14_Analysis", "Arch14CZ_ID"][0]] = {
+			"Name": name, "AMCR_ID": amcr_id
+		}
+		dict_activity_area.add((name, amcr_id))
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
 		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	
-	lookup_Feature = {}   # {obj_id: Name, ...}
+	lookup_Feature = {}   # {obj_id: {Name, AMCR_ID}, ...}
 	query = cmodel.get_query(
-		"SELECT C_14_Analysis.Arch14CZ_ID, Feature.Name", silent = True
+		"SELECT C_14_Analysis.Arch14CZ_ID, Feature.Name, Feature.AMCR_ID", silent = True
 	)
 	for row in range(len(query)):
-		value = str_or_empty(query[row, "Feature", "Name"][1])
-		lookup_Feature[query[row, "C_14_Analysis", "Arch14CZ_ID"][0]] = value
-		dict_feature.add(value)
+		name = str_or_empty(query[row, "Feature", "Name"][1])
+		amcr_id = str_or_empty(query[row, "Feature", "AMCR_ID"][1])
+		lookup_Feature[query[row, "C_14_Analysis", "Arch14CZ_ID"][0]] = {
+			"Name": name, "AMCR_ID": amcr_id
+		}
+		dict_feature.add((name, amcr_id))
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
 		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	
-	lookup_Material = {}   # {obj_id: Name, ...}
+	lookup_Material = {}   # {obj_id: {Name, AMCR_ID}, ...}
 	query = cmodel.get_query(
-		"SELECT C_14_Analysis.Arch14CZ_ID, Material.Name", silent = True
+		"SELECT C_14_Analysis.Arch14CZ_ID, Material.Name, Material.AMCR_ID", silent = True
 	)
 	for row in range(len(query)):
-		value = str_or_empty(query[row, "Material", "Name"][1])
-		lookup_Material[query[row, "C_14_Analysis", "Arch14CZ_ID"][0]] = value
-		dict_material.add(value)
+		name = str_or_empty(query[row, "Material", "Name"][1])
+		amcr_id = str_or_empty(query[row, "Material", "AMCR_ID"][1])
+		lookup_Material[query[row, "C_14_Analysis", "Arch14CZ_ID"][0]] = {
+			"Name": name, "AMCR_ID": amcr_id
+		}
+		dict_material.add((name, amcr_id))
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
@@ -362,15 +394,18 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	if progress.cancel_pressed():
 		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	
-	lookup_Relative_Dating = defaultdict(list)  # {obj_id: [{Name, Order_Min, Order_Max}, ...], ...}
+	lookup_Relative_Dating = defaultdict(list)  # {obj_id: [{Name, General, AMCR_ID, Order_Min, Order_Max}, ...], ...}
 	query = cmodel.get_query(
 		"SELECT C_14_Analysis.Arch14CZ_ID, Relative_Dating.Name, \
+			Relative_Dating.General, Relative_Dating.AMCR_ID, \
 			Relative_Dating.Order_Min, Relative_Dating.Order_Max",
 		silent = True
 	)
 	for row in range(len(query)):
 		lookup_Relative_Dating[query[row, "C_14_Analysis", "Arch14CZ_ID"][0]].append({
 			"Name": str_or_empty(query[row, "Relative_Dating", "Name"][1]),
+			"General": str_or_empty(query[row, "Relative_Dating", "General"][1]),
+			"AMCR_ID": str_or_empty(query[row, "Relative_Dating", "AMCR_ID"][1]),
 			"Order_Min": str_or_empty(query[row, "Relative_Dating", "Order_Min"][1]),
 			"Order_Max": str_or_empty(query[row, "Relative_Dating", "Order_Max"][1]),
 		})
@@ -380,15 +415,18 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	
 	query = cmodel.get_query(
-		"SELECT Relative_Dating.Name, Relative_Dating.Order_Min, Relative_Dating.Order_Max",
+		"SELECT Relative_Dating.Name, Relative_Dating.General, Relative_Dating.AMCR_ID, \
+			Relative_Dating.Order_Min, Relative_Dating.Order_Max \
+			WHERE Relative_Dating.General == 1",
 		silent = True
 	)
 	for row in range(len(query)):
 		name = str_or_empty(query[row, "Relative_Dating", "Name"][1])
+		amcr_id = str_or_empty(query[row, "Relative_Dating", "AMCR_ID"][1])
 		order_min = str_or_empty(query[row, "Relative_Dating", "Order_Min"][1])
 		order_max = str_or_empty(query[row, "Relative_Dating", "Order_Max"][1])
 		if order_min and order_max:
-			dict_relative_dating.add((name, int(order_min), int(order_max)))
+			dict_relative_dating.add((name, amcr_id, int(order_min), int(order_max)))
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
@@ -403,11 +441,10 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 	dict_feature = sorted(list(dict_feature))
 	dict_material = sorted(list(dict_material))
 	dict_relative_dating = sorted(
-		list(dict_relative_dating), key = lambda row: row[1]
+		list(dict_relative_dating), key = lambda row: row[2]
 	)
 	
 	for name, data in [
-		(table_country, dict_country),
 		(table_activity_area, dict_activity_area),
 		(table_feature, dict_feature), 
 		(table_material, dict_material),
@@ -416,21 +453,30 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		progress.update_state(value = cnt, maximum = cmax)
 		if progress.cancel_pressed():
 			return cancel_progress(n_published, n_rows, ["Cancelled by user"])
-		for value in data:
-			if value and (value != "unpublished"):
-				cursor.execute("INSERT INTO %s.%s VALUES (%%s);" % (schema, name), (value,))
+		for values in data:
+			if values[0] != "unpublished":
+				cursor.execute("INSERT INTO %s.%s VALUES (%%s, %%s);" % (schema, name), values)
 	
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
 		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
-	for district, country_code in dict_district:
+	for country, country_code in dict_country:
+		cursor.execute(
+			"INSERT INTO %s.%s VALUES (%%s, %%s, %%s);" % (schema, table_country), 
+			(country_code, country, country_code)
+		)
+	
+	cnt += 1
+	progress.update_state(value = cnt, maximum = cmax)
+	if progress.cancel_pressed():
+		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
+	for district, country_code, district_code in dict_district:
 		if district:
 			code = "%s#%s" % (country_code, district)
-			label = "%s" % (district)
 			cursor.execute(
-				"INSERT INTO %s.%s VALUES (%%s, %%s);" % (schema, table_district), 
-				(code, label)
+				"INSERT INTO %s.%s VALUES (%%s, %%s, %%s);" % (schema, table_district), 
+				(code, district, district_code)
 			)
 	
 	cnt += 1
@@ -439,24 +485,22 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
 	for cadastre, district, country_code, cadastre_code in dict_cadastre:
 		if cadastre:
-			code = "%s#%s#%s#%s" % (country_code, district, cadastre, cadastre_code)
+			code = "%s#%s#%s" % (country_code, district, cadastre)
 			label = "%s (%s)" % (cadastre, district)
 			cursor.execute(
-				"INSERT INTO %s.%s VALUES (%%s, %%s);" % (schema, table_cadastre), 
-				(code, label)
+				"INSERT INTO %s.%s VALUES (%%s, %%s, %%s);" % (schema, table_cadastre), 
+				(code, label, cadastre_code)
 			)
 	
 	cnt += 1
 	progress.update_state(value = cnt, maximum = cmax)
 	if progress.cancel_pressed():
 		return cancel_progress(n_published, n_rows, ["Cancelled by user"])
-	for name, order_min, order_max in dict_relative_dating:
-		if "," in name:
-			continue
+	for name, amcr_id, order_min, order_max in dict_relative_dating:
 		code = "%d#%d" % (order_min, order_max)
 		cursor.execute(
-			"INSERT INTO %s.%s VALUES (%%s, %%s);" % (schema, table_relative_dating), 
-			(code, name)
+			"INSERT INTO %s.%s VALUES (%%s, %%s, %%s, %%s, %%s);" % (schema, table_relative_dating), 
+			(code, name, amcr_id, order_min, order_max)
 		)
 	
 	n_published = 0
@@ -489,25 +533,30 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 		vCountry = ""
 		vCountryCode = ""
 		vDistrict = ""
+		vDistrictCode = ""
 		vCadastre = ""
 		vCadastreCode = ""
 		if obj_id in lookup_CountryDistrictCadastre:
 			vCountry = lookup_CountryDistrictCadastre[obj_id]["Country"]
 			vCountryCode = lookup_CountryDistrictCadastre[obj_id]["Country_Code"]
 			vDistrict = lookup_CountryDistrictCadastre[obj_id]["District"]
+			vDistrictCode = lookup_CountryDistrictCadastre[obj_id]["District_Code"]
 			vCadastre = lookup_CountryDistrictCadastre[obj_id]["Cadastre"]
 			vCadastreCode = lookup_CountryDistrictCadastre[obj_id]["Cadastre_Code"]
 		vSite = lookup_Site[obj_id]["Name"] if obj_id in lookup_Site else ""
 		vCoordinates = lookup_Site[obj_id]["Location"] if obj_id in lookup_Site else ""
-		vAMCR_ID = lookup_Site[obj_id]["AMCR_ID"] if obj_id in lookup_Site else ""
-		vContext_Name = lookup_Context[obj_id]["Name"] if obj_id in lookup_Context else ""
+		vSite_AMCR_ID = lookup_Site[obj_id]["AMCR_ID"] if obj_id in lookup_Site else ""
+		vActivity_Area = lookup_Activity_Area[obj_id]["Name"]
+		vActivity_Area_AMCR_ID = lookup_Activity_Area[obj_id]["AMCR_ID"]
+		vFeature = lookup_Feature[obj_id]["Name"]
+		vFeature_AMCR_ID = lookup_Feature[obj_id]["AMCR_ID"]
 		vContext_Description = lookup_Context[obj_id]["Description"] if obj_id in lookup_Context else ""
 		vContext_Depth = lookup_Context[obj_id]["Depth"] if obj_id in lookup_Context else ""
-		vActivity_Area = lookup_Activity_Area[obj_id] if obj_id in lookup_Activity_Area else ""
-		vFeature = lookup_Feature[obj_id] if obj_id in lookup_Feature else ""
+		vContext_Name = lookup_Context[obj_id]["Name"] if obj_id in lookup_Context else ""
 		vSample_Number = lookup_Sample[obj_id] if obj_id in lookup_Sample else ""
 		vSample_Note = str_or_empty(obj.get_descriptor("Note_Sample"))
-		vMaterial = lookup_Material[obj_id] if obj_id in lookup_Material else ""
+		vMaterial = lookup_Material[obj_id]["Name"]
+		vMaterial_AMCR_ID = lookup_Material[obj_id]["AMCR_ID"]
 		vMaterial_Note = str_or_empty(obj.get_descriptor("Note_Material"))
 		vSource = []
 		for row in lookup_Source[obj_id]:
@@ -516,19 +565,23 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 			] if value]))
 		vSource = "\n".join(sorted(vSource, key = lambda row: len(row)))
 		vRelative_Dating_Name = []
+		vRelative_Dating_AMCR_ID = []
 		vRelative_Dating_Order = set([])
 		for row in lookup_Relative_Dating[obj_id]:
 			vRelative_Dating_Name.append(row["Name"])
+			if row["AMCR_ID"]:
+				vRelative_Dating_AMCR_ID.append(row["AMCR_ID"])
 			order_min, order_max = row["Order_Min"], row["Order_Max"]
 			if order_min and order_max:
 				vRelative_Dating_Order.update(
 					list(range(int(order_min), int(order_max) + 1))
 				)
 		vRelative_Dating_Name = "; ".join(vRelative_Dating_Name)
+		vRelative_Dating_AMCR_ID = "; ".join(vRelative_Dating_AMCR_ID)
 		vRelative_Dating_Order = sorted(list(vRelative_Dating_Order))
 		
 		cursor.execute(
-			"INSERT INTO %s.%s VALUES (%s);" % (schema, table_main, ", ".join(["%s"]*29)), 
+			"INSERT INTO %s.%s VALUES (%s);" % (schema, table_main, ", ".join(["%s"]*34)), 
 			(
 				vArch14CZ_ID,
 				vC_14_Lab_Code,
@@ -542,21 +595,26 @@ def publish_data(cmodel, frontend_connection, path_curve, progress):
 				vCountry,
 				vCountryCode,
 				vDistrict,
+				vDistrictCode,
 				vCadastre,
 				vCadastreCode,
 				vSite,
+				vSite_AMCR_ID,
 				vCoordinates,
-				vAMCR_ID,
-				vContext_Name,
+				vActivity_Area,
+				vActivity_Area_AMCR_ID,
+				vFeature,				
+				vFeature_AMCR_ID,				
 				vContext_Description,
 				vContext_Depth,
-				vActivity_Area,
-				vFeature,
+				vContext_Name,
 				vRelative_Dating_Name,
+				vRelative_Dating_AMCR_ID,
 				vRelative_Dating_Order,
 				vSample_Number,
 				vSample_Note,
 				vMaterial,
+				vMaterial_AMCR_ID,
 				vMaterial_Note,
 				vSource,
 			)

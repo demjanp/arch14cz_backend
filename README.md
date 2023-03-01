@@ -88,47 +88,54 @@ Data can be imported from an Excel (.xlsx) file via the menu `Backend` &rarr; `I
 
 The file has to contain the following columns:
 1. Lab Code
+	The laboratory code is unique for each sample and serves to identify it. It also carries information about the laboratory that measured the sample.
 2. C-14 Activity BP:
     C-14 measurement in radiocarbon (uncalibrated) years BP
 3. C-14 Uncertainty 1 Sigma:
     1-sigma uncertainty of the measurement
-5. C-14 Method:
+4. C-14 Method:
     AMS or conventional
-6. Delta C-13:
+5. Delta C-13:
     Delta C-13 measurement
-7. C-14 Analysis Note
-8. Country
-9. Cadastre
-10. Cadastre Code:
+6. C-14 Analysis Note
+7. Country
+8. Cadastre
+9. Cadastre Code:
     Code of the cadastre (see https://www.czso.cz/csu/rso/katastralni_uzemi_rso).
-11. District
-12. Site Name
-13. Site Coordinates:
+10. District
+11. Site Name
+	Unique name of the site where the sample was collected.
+12. Site Coordinates:
     WGS 84 standard, format XX.XXXXXXXN, XX.XXXXXXXE
-14. Site Note
-15. AMCR ID
+13. Site Note
+14. AMCR ID
 	Identifier of an archaeological event ('akce') in the [Archaeological Map of the Czech Republic](https://amcr-info.aiscr.cz/)
-16. Activity Area:
-    Type of the archaeological activity area.
-17. Feature:
-    Type of the archaeological feature.
-18. Context Name:
-    Identifier of the context within the site (e.g., Feature 123).
-19. Context Description
-20. Context Depth cm:
+15. Activity Area:
+    Type of the archaeological activity area according to the AMCR dictionary.
+    Validated against [activity_area.csv](src/arch14cz_backend/data/activity_area.csv).
+16. Feature:
+    Type of the archaeological feature according to the AMCR dictionary.
+    Validated against [feature.csv](src/arch14cz_backend/data/feature.csv).
+17. Context Description
+	Description of the position of the sample within the feature.
+18. Context Depth cm:
     Depth at which the sample was retrieved.
-21. Relative Dating Name 1:
-    Relative dating of the context, as detailed as possible (e.g., Lengyel Culture, phase I).
-22. Relative Dating Name 2:
+19. Context Name:
+    Identifier of the context within the site (e.g., Feature 123).
+20. Relative Dating Name 1:
+    Relative dating of the context, as detailed as possible in the format "[General Dating], [phase]" (e.g., Lengyel Culture, phase I).
+    The general dating is validated against [relative_dating.csv](src/arch14cz_backend/data/relative_dating.csv).
+21. Relative Dating Name 2:
     Additional relative dating.
-23. Sample Number:
-    Inventory number of the dated sample.
-24. Sample Note
-25. Material Name
-	General type of the material of the sample (e.g., animal bone, charcoal)
-26. Material Note
+22. Sample Number:
+    ID assigned by the submitter of the dated sample.
+23. Sample Note
+	Includes collagen values and other accompanying measurements.
+24. Material Name
+	General type of the material of the sample (e.g., animal bone, charcoal). Validated against [material.csv](src/arch14cz_backend/data/material.csv).
+25. Material Note
 	Detailed description of the material (e.g. sus scrofa, triticum monococcum)
-27. Reliability:
+26. Reliability:
     Reliability of the C-14 dating in respect to the archaeological context. Possible values:
     <pre>no problems declared
     in contradiction with archaeological chronology/sequence
@@ -137,18 +144,19 @@ The file has to contain the following columns:
     other problems
     sample contamination
     </pre>
-28. Reliability Note
-29. Source Description:
+27. Reliability Note
+28. Source Description:
     Citation of the source.
-30. Source Reference:
+29. Source Reference:
     Reference to page or figure.
-31. Source URI:
+30. Source URI:
     DOI or aleph link (where applicable).
-32. Source Acquisition:
+31. Source Acquisition:
     Original source of the data (Arch14CZ, C14.sk or other database) 
-33. Submitter Name
-34. Submitter Organization
-35. Public:
+32. Submitter Name
+	In the format [First name] [Last Name]
+33. Submitter Organization
+34. Public:
 	1 or 0, indicates whether the date can be published (if set to 0, the values of C-14 activity and uncertainty will be set to -1 when publishing to the frontend database)
 
 ### Choosing a Radiocarbon Calibration Curve <a name="curve"></a>

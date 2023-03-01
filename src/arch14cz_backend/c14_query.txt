@@ -1,6 +1,0 @@
-
-<Title>Relative Datings - General</>
-<Type Query/>
-		
-<QueryString>SELECT Relative_Dating.* WHERE ',' not in Relative_Dating.Name</>
-		

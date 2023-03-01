@@ -21,7 +21,7 @@ class CModel(DCModel):
 		
 		self._frontend_connection = {}
 		self._frontend_valid = False
-		self._cal_curve = os.path.join(os.path.dirname(arch14cz_backend.__file__), "intcal20.14c")
+		self._cal_curve = os.path.join(os.path.dirname(arch14cz_backend.__file__), "data", "intcal20.14c")
 		
 	
 	# ---- Signal handling
@@ -136,7 +136,13 @@ class CModel(DCModel):
 	
 	def create_schema(self):
 		
+		self.cmain.cview.progress.show("Creating Schema")
+		self._model.blockSignals(True)
 		create_schema(self)
+		self.cmain.cview.progress.stop()
+		self._model.blockSignals(False)
+		self.on_changed([],[])
+		
 	
 	def update_datings(self):
 		

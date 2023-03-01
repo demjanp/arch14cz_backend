@@ -27,18 +27,20 @@ def update_datings(cmodel):
 		if "," in name:
 			detailed.add(name)
 			general.add(to_general(name))
+			obj.set_descriptor("General", 0)
 		else:
-			general.add(name)
+			obj.set_descriptor("General", 1)
 	for name in general:
 		if name not in obj_lookup:
-			obj_lookup[name] = cmodel.add_object_with_descriptors(cls, {"Name": name})
+			obj_lookup[name] = cmodel.add_object_with_descriptors(cls, {"Name": name, "General": 1})
 	for name in detailed:
 		name_general = to_general(name)
 		obj_lookup[name_general].add_relation(obj_lookup[name], "contains")
 
 def get_phasing(cmodel, 
-		dating_cls = "Relative_Dating", name_descr = "Name", 
-		before_rel = "before", same_as_rel = "same_as", contains_rel = "contains"
+		dating_cls = "Relative_Dating", name_descr = "Name", general_descr = "General", 
+		before_rel = "before", same_as_rel = "same_as", contains_rel = "contains",
+		general_only = False
 	):
 	# cmodel = Deposit GUI DCModel
 	# returns phasing, names, circulars
@@ -46,7 +48,10 @@ def get_phasing(cmodel,
 	# 	names = {obj_id: name, ...}
 	#	circulars = [obj_id, ...]
 	
-	def extract_datings(cmodel, dating_cls, name_descr, before_rel, contains_rel):
+	def extract_datings(cmodel, 
+			dating_cls, name_descr, general_descr, 
+			before_rel, contains_rel, general_only
+		):
 		# returns G = nx.DiGraph
 		# G.nodes[obj_id]["name"] = dating name
 		# G.edges() = [(obj_id1, obj_id2), ...]; obj_id1 -> before -> obj_id2
@@ -58,6 +63,8 @@ def get_phasing(cmodel,
 			return G
 		
 		for obj in cls.get_members(direct_only = True):
+			if general_only and (obj.get_descriptor(general_descr) != "1"):
+				continue
 			G.add_node(obj.id, name = obj.get_descriptor(name_descr))
 		for obj1 in cls.get_members(direct_only = True):
 			objs1 = set([obj1.id])
@@ -148,7 +155,10 @@ def get_phasing(cmodel,
 			phase_max = phase_min
 		return int(phase_min), int(phase_max)
 	
-	G = extract_datings(cmodel, dating_cls, name_descr, before_rel, contains_rel)
+	G = extract_datings(cmodel, 
+		dating_cls, name_descr, general_descr, 
+		before_rel, contains_rel, general_only
+	)
 	
 	nodes = sorted(list(G.nodes()))
 	n_nodes = len(nodes)
@@ -220,7 +230,7 @@ def update_order(cmodel, progress = None):
 
 def vis_order(cmodel, detailed = False):
 	
-	phasing, names, circulars = get_phasing(cmodel)
+	phasing, names, circulars = get_phasing(cmodel, general_only = not detailed)
 	# phasing = {obj_id: [phase_min, phase_max], ...}; phase_min/max = -1 if no chronological relations found
 	# names = {obj_id: name, ...}
 	# circulars = [obj_id, ...]
