@@ -1,6 +1,10 @@
 # Arch14CZ - Backend
 Backend interface for Arch14CZ - Czech Archaeological Radiocarbon Database
 
+:warning: Unofficial development version :warning:
+
+Active version at <https://github.com/ARUP-CAS/aiscr-arch14cz-backend>
+
 Created on 14. 12. 2021
 
 **Table of Contents**

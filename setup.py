@@ -43,6 +43,7 @@ setup(
 		'deposit_gui>=1.4.38, <1.5',
 		'numpy>=1.24.1',
 		'scipy>=1.10.0, <2',
+		'matplotlib>=3.7.0, <4',
 	],
 	cmdclass={'bdist_wheel': bdist_wheel},
 )
