@@ -109,15 +109,27 @@ def create_schema(cmodel):
 		silent = True
 	)
 	existing = set()
-	for row in query:
-		country, district, cadastre, code = row
-		code = try_numeric(code)
-		existing.add((country, district, cadastre, code))
-	
-	data = load_csv(os.path.join(folder, "data", "district_cadastre.csv"))
 	lookup_country = {}
 	lookup_district = {}
 	lookup_cadastre = {}
+	
+	for row in query:
+		country, district, cadastre, code = row
+		
+		country_id, country = country
+		district_id, district = district
+		cadastre_id, cadastre = cadastre
+		_, code = code
+		
+		code = try_numeric(code)
+		
+		lookup_country[country] = cmodel.get_object(country_id)
+		lookup_district[district] = cmodel.get_object(district_id)
+		lookup_cadastre[cadastre] = cmodel.get_object(cadastre_id)
+		
+		existing.add((country, district, cadastre, code))
+	
+	data = load_csv(os.path.join(folder, "data", "district_cadastre.csv"))
 	for country, country_code, district, district_code, cadastre, cadastre_code in data:
 		country = country.strip()
 		country_code = country_code.strip()

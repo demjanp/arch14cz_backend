@@ -20,7 +20,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
 	name="arch14cz_backend",
-	version="1.0.1",
+	version="1.0.2",
 	description="Backend interface for Arch14CZ - the database of archaeological radiocarbon dates of the Czech Republic",
 	long_description=long_description,
 	long_description_content_type="text/markdown",
